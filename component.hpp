@@ -20,34 +20,6 @@ Node::Node(){ //Constructorfor either an empty node or the reference node
 	this->ID=0;
 }
 
-class Sim{ //Currently unused struct for toring the type of simulations. Potentially worth merging with SimParams. Structs DC and Tran inherit from this.
-public:
-    string simType;
-};
-class DC : Sim{
-    DC();
-};
-DC::DC(){
-    this->simType = "DC";
-}
-class Tran:Sim{
-    double timeStep;
-    double start;
-    double end;
-    int steps;
-    Tran(double start, double end, double timeStep);
-    Tran(double start, double end, int steps);
-};
-Tran::Tran(double start, double end, double timeStep){
-    this->start = start;
-    this->end = end;
-    this->timeStep = timeStep;
-    this->steps = ((start-end)/timeStep);
-}
-Tran::Tran(double start, double end, int steps){
-    this->start = start;
-}
-
 class Component{
 public:
     string cName; //The component name ie "Resistor", "Capacitor" etc.
@@ -83,6 +55,36 @@ Source::Source(function<double(double)> f, double offset){
 Source::Source(double offset){
 	this->DCOffset = offset;
 	this->waveform = [](double d) {return offset;};
+}
+
+class Sim{ //Currently unused struct for toring the type of simulations. Potentially worth merging with SimParams. Structs DC and Tran inherit from this.
+public:
+    string simType;
+	vector<Source> Sources;
+	vector<Resistor> Resistors;
+};
+class DC : Sim{
+    DC();
+};
+DC::DC(){
+    this->simType = "DC";
+}
+class Tran:Sim{
+    double timeStep;
+    double start;
+    double end;
+    int steps;
+    Tran(double start, double end, double timeStep);
+    Tran(double start, double end, int steps);
+};
+Tran::Tran(double start, double end, double timeStep){
+    this->start = start;
+    this->end = end;
+    this->timeStep = timeStep;
+    this->steps = ((start-end)/timeStep);
+}
+Tran::Tran(double start, double end, int steps){
+    this->start = start;
 }
 
 
