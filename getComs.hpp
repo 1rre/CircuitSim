@@ -5,6 +5,7 @@
 #include <regex>
 #include <any>
 #include <string>
+#include <cmath>
 //#include <armadillo>
 //#include "Matrix.hpp"
 #include "component.hpp"
@@ -15,22 +16,18 @@ double getVal(string num);
 
 Sim GetComs(){
     const regex comment("([*].*)"); //* followed by anything, ie a comment (haha meta)
-    const regex cEnd("([.]end)"); //an end instruction, implying anything beyond that point needn't be parsed
-    const regex op("([.]op)"); //a dc bias check command
+    const regex tranEx("([.]tran 0 [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s 0 [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s)"); //A transient simulation command. Interestingly this has units unlike the others.
     const regex dc("DC [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?"); //A DC source
     const regex sine("SINE ([(][0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?[)])"); //An AC source with SINE input
     const regex node("(( 0)|( N[0-9][0-9][0-9]))"); //A node: 0 or N followed by 3 digits.
     const regex res("(R(([0-9]+)|([A-z]+))+)"); //A named resistor
+	const regex ind("(C(([0-9]+)|([A-z]+))+)"); //A named resistor
+	const regex cap("(I(([0-9]+)|([A-z]+))+)"); //A named resistor
     const regex vSrc("V(([0-9]+)|([A-z]+))+"); //A named voltage source
-    const regex cSrc("I(([0-9]+)|([A-z]+)#include <functional>
-#include <cmath>)+"); //A named current source
+    const regex cSrc("I(([0-9]+)|([A-z]+))+"); //A named current source
     const regex value(" ([0-9]+)(([.][0-9]+)?)((p|n|u|µ|m|k|(Meg)|G)?)"); //A double value including the unit prefix
-    const regex tranEx("([.]tran 0 [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s 0 [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s)"); //A transient simulation command. Interestingly this has units unlike the others.
-    const regex cSrcEx("(I(([0-9]+)|([A-z]+))+ ((N[0-9][0-9][0-9])|0) ((N[0-9][0-9][0-9])|0) ((SINE)|(DC))(( [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)|([(][0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?[)])))"); //A full line in the CIR file for any type of current source, either AC or DC
-    const regex resEx("(R(([0-9]+)|([A-z]+))+ ((N[0-9][0-9][0-9])|0) ((N[0-9][0-9][0-9])|0) [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)"); //A full line in the CIR file for any resistor
-    const regex vSrcEx("(V(([0-9]+)|([A-z]+))+ ((N[0-9][0-9][0-9])|0) ((N[0-9][0-9][0-9])|0) ((SINE)|(DC))(( [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)|([(][0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?[)])))");//A full line in the CIR file for any type of voltage source, either AC or DC
-    const regex indEx("(L(([0-9]+)|([A-z]+))+ ((N[0-9][0-9][0-9])|0) ((N[0-9][0-9][0-9])|0) [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)"); //A full line in the CIR file for any inductor
-    const regex capEx("(C(([0-9]+)|([A-z]+))+ ((N[0-9][0-9][0-9])|0) ((N[0-9][0-9][0-9])|0) [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)"); //A full line in the CIR file for any capacitor
+    const regex vComEx("(R(([0-9]+)|([A-z]+))+ ((N[0-9][0-9][0-9])|0) ((N[0-9][0-9][0-9])|0) [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)"); //A full line in the CIR file for any resistor
+    const regex srcEx("((V|I)(([0-9]+)|([A-z]+))+ ((N[0-9][0-9][0-9])|0) ((N[0-9][0-9][0-9])|0) ((SINE)|(DC))(( [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)|([(][0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?[)])))");//A full line in the CIR file for any type of voltage source, either AC or DC
     Sim rtn; //This will be our sim. There are many like it but this one is ours. Our sim is our best friend. It is our life. We must master it as we master our lives. Without us, our sim is useless. Without our sim, we are useless. We must run our sim true. We must simulate faster than the programs who are trying to simulate us. We must simulate them before they simulate us. Our sim and us know what counts in simulation is not the circuits you simulate, the current sources we approximate, nor the resistors we model. We know that is is the voltages we calculate that count. Our sim is human, even as us, because it is our life. Thus, we will learn it as a brother. We will learn its weaknesses, its strengths, its functions, its objects, its variables and its bugs. We will keep our sim well commented and optimised. We will become part of each other. Before Dave Thomas, we swear this creed. Our sim and us are the simulators of SPICE circuits. We are the masters of current sources. We are the simulators of life. So it be, until the circuit has been simulated and there are no more current sources, but comma separated values.
 	vector<string> lines; //The vector of strings read from cin. Used so that the user can input lines without having to wait for them to parse.
     while(cin){ //While data is being inputted
@@ -38,7 +35,27 @@ Sim GetComs(){
 		getline(cin, line); //Add the next line to the string
 		lines.push_back(line); //Add the line to the vector of lines.
 	}
+	for(string l:lines){
+		if(regex_match(l,vComEx)){
+			//here be resistors
+		}
+		else if(regex_match(l,srcEx)){
 
+		}
+		else if(regex_match(l,tranEx)){
+
+		}
+		else if(l==".op"){
+			rtn.DC(); //Set the number of steps to 0. This is how we will decide something is a bias point check.
+		}
+		else if(l==".end"){
+			break; //break out of the for loop
+		}
+		else if(!regex_match(l,comment)){ //If the line isn't a command or a comment
+			cerr<<"Exception in netlist: Invalid format '"<<l<<"' found. Exiting."<<endl;
+			exit(1); //Exit with error code 1: Invalid format in netlist //TODO: make list of error codes and what they mean
+		}
+	}
     return rtn;
 }
 

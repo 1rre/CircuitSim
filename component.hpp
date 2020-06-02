@@ -64,39 +64,29 @@ Source::Source(double offset, bool b){
 
 class Sim{ //Currently unused struct for toring the type of simulations. Potentially worth merging with SimParams. Structs DC and Tran inherit from this.
 public:
-    string simType;
 	vector<Source> sources;
 	vector<vComponent> resistors;
 	vector<vComponent> reactComs;
 	vector<Node> nodes;
+	double timeStep;
+	double start;
+	double end;
+	int steps;
+	void DC(){
+		this->steps = 0;
+	}
+	void Tran(double start, double end, double timeStep){
+	    this->start = start;
+	    this->end = end;
+	    this->timeStep = timeStep;
+	    this->steps = ((start-end)/timeStep);
+	}
+	void Tran(double start, double end, int steps){
+	    this->start = start;
+		this->end = end;
+		this->steps = steps;
+		this->timeStep = (end-start)/steps;
+	}
 };
-class DC : Sim{
-    DC();
-};
-DC::DC(){
-    this->simType = "DC";
-}
-class Tran:Sim{
-    double timeStep;
-    double start;
-    double end;
-    int steps;
-    Tran(double start, double end, double timeStep);
-    Tran(double start, double end, int steps);
-};
-Tran::Tran(double start, double end, double timeStep){
-	this->simType = "Tran";
-    this->start = start;
-    this->end = end;
-    this->timeStep = timeStep;
-    this->steps = ((start-end)/timeStep);
-}
-Tran::Tran(double start, double end, int steps){
-	this->simType = "Tran";
-    this->start = start;
-	this->end = end;
-	this->steps = steps;
-	this->timeStep = (end-start)/steps;
-}
 
 #endif
