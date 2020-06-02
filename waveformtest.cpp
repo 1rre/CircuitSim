@@ -4,28 +4,24 @@
 
 using namespace std;
 
-/* 	[-]: All done, [x]: Testing in progress, [o]: Ready for testing, [~]: Writing in progress, [ ]: Not started
+/* 	[-]: All done, [x]: Testing in progress, [o]: Ready for testing, [+]: Writing in progress, [ ]: Not started
 
 	0: DC			|[-] Offset
 	1: Pulse		|[-] vInitial	|[-] vOn		|[-] tDelay		|[x] tRise		|[x] tFall		|[x] tOn		|[x] Period		|[o] nCycles
 	2: Sine 		|[-] vOffset	|[-] vAmp		|[-] freq		|[-] tDelay		|[-] theta		|[o] phi		|[o] nCycles
 	3: Exp 			|[-] vInitial	|[-] vPulse		|[-] rDelay		|[-] rTau		|[-] fDelay		|[-] fTau
-	4: SFFM 		|[~] vOffset	|[~] vAmp		|[~] fCarrier	|[~] mIndex		|[~] fSignal	|[~] tDelay
+	4: SFFM 		|[-] vOffset	|[-] vAmp		|[-] fCarrier	|[-] mIndex		|[-] fSignal	|[-] tDelay
 	5: PWL 			|[-] t			|[-] v
 	5: PWL File 	|[ ] «File»		//Moved to input. Now shares id 5 with PWL.
-	6: AM 			|[~] aSignal	|[~] fCarrier	|[~] fMod		|[~] cOffset	|[~] tDelay
+	6: AM 			|[+] aSignal	|[+] fCarrier	|[+] fMod		|[+] cOffset	|[+] tDelay
 
 */
 
 
 int main(){
-//	vector<double> args{99, 59};
-	vector<double> args;
-	for(char c:"points.csv"){
-		args.push_back(c);
-	}
-	Source _1 = Source(false,6,args);
-	double stop = 20;
+	vector<double> args{1,3,50,30,5,0.5};
+	Source _1 = Source(false,4,args);
+	double stop = 1;
 	for(double i = 0; i<stop; i+=stop/10000){
 		cout<<i<<","<<_1.waveform(i)<<endl;
 	}

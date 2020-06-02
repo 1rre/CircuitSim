@@ -135,7 +135,7 @@ Source::Source(bool b, int id, vector<double> args){
 				if(time <= tDelay || time > tPeriod * nCycles + tDelay){
 					return vInitial;
 				}
-				double effTime = fmod(time - tDelay, tPeriod);
+				const double effTime = fmod(time - tDelay, tPeriod);
 				if(effTime <= tRise){
 					return vInitial + (vOn - vInitial) * (effTime / tRise);
 				}
@@ -201,7 +201,8 @@ Source::Source(bool b, int id, vector<double> args){
 				else if(time > nCycles / freq + tDelay){
 					return vOffset + vAmp * exp(theta * (nCycles/freq)) * sin(2 * M_PI * nCycles + phi / (2 * M_PI));
 				}
-				return vOffset + vAmp * exp(theta * (tDelay - time)) * sin(2 * M_PI * freq * (time - tDelay) + phi / (2 * M_PI));
+				const double effTime = tDelay - time;
+				return vOffset + vAmp * exp(theta * effTime) * sin(2 * M_PI * freq * effTime + phi / (2 * M_PI));
 			};
 			break;}
 		case 3:{ //Exp
@@ -291,9 +292,11 @@ Source::Source(bool b, int id, vector<double> args){
 					break;}
 			}
 			this->waveform = [vOffset, vAmp, fCarrier, mIndex, fSignal,tDelay](double time){
-
-
-					return time;
+				if(time<tDelay){
+					return vOffset;
+				}
+				const double effTime = time - tDelay;
+				return vOffset + vAmp * (sin(2 * M_PI * fCarrier * effTime + mIndex * sin(2 * M_PI * fSignal * effTime)));
 			};
 			break;}
 		case 5:{ //Pwl
