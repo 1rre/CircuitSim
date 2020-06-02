@@ -200,30 +200,51 @@ Source::Source(bool b, int id, vector<double> args){
 			};
 			break;}
 		case 3:{ //Exp
-			double vInitial = 0, vPulsed = 0, rDelay = 0, rTau = 0, fDelay = 0, fTau = 0;
+			double vInitial = 0, vPulse = 0, rDelay = 0, rTau = 0, fDelay = 0, fTau = 0;
 			switch(args.size()){
 				case 1:{ //Vinitial (DC Offset)
-
+					vInitial = args[0];
 					break;}
 				case 2:{ //Prevs & Vpulsed
-
+					vInitial = args[0];
+					vPulse = args[1];
 					break;}
 				case 3:{ //Prevs & Rise Delay
-
+					vInitial = args[0];
+					vPulse = args[1];
+					rDelay = args[2];
 					break;}
 				case 4:{ //Prevs & Rise Tau
-
+					vInitial = args[0];
+					vPulse = args[1];
+					rDelay = args[2];
+					rTau = args[3];
 					break;}
 				case 5:{ //Prevs & Fall Delay
-
+					vInitial = args[0];
+					vPulse = args[1];
+					rDelay = args[2];
+					rTau = args[3];
+					fDelay = args[4];
 					break;}
 				case 6:{ //Prevs & Fall Tau
-
+					vInitial = args[0];
+					vPulse = args[1];
+					rDelay = args[2];
+					rTau = args[3];
+					fDelay = args[4];
+					fTau = args[5];
 					break;}
 				}
-			this->waveform = [vInitial,vPulsed,rDelay,rTau,fDelay,fTau](double time){
-
-				return time;
+			this->waveform = [vInitial,vPulse,rDelay,rTau,fDelay,fTau](double time){
+				double rtn = vInitial;
+				if(time > rDelay){
+					rtn += (vPulse - vInitial) * (1 - exp((rDelay - time) / rTau));
+					if(time > rDelay + fDelay){
+						rtn += (vInitial - vPulse) * (1 - exp((rDelay + fDelay - time) / fTau));
+					}
+				}
+				return rtn;
 			};
 			break;
 		}
