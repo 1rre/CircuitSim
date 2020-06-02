@@ -18,7 +18,7 @@ Sim getComs(){
 	int rCnt = 0;
 	const regex value(" (([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)");
     const regex comment("([*].*)"); //* followed by anything, ie a comment (haha meta)
-    const regex tranEx("([.]tran 0 [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s 0 [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s)"); //A transient simulation command. Interestingly this has units unlike the others.
+    const regex tranEx("([.]tran 0 [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s?( [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s?)*( [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s?)*)"); //A transient simulation command. Interestingly this has units unlike the others.
     const regex dc("(DC (([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))"); //A DC source
     const regex sine("(SINE [(]( ?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])"); //An AC source with SINE input
 	const regex pulse("(PULSE [(]( ?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])");
@@ -136,26 +136,71 @@ Sim getComs(){
 				aS.srcFunc(aS.cName == 'I', 0, args);
 			}
 			else if(regex_search(_l,m,pulse)){
-
+				vector<double> args;
+				while(regex_search(_l,m,value)){
+					args.push_back(getVal(m.str(0)));
+					_l = m.suffix();
+				}
+				aS.srcFunc(aS.cName == 'I', 1, args);
 			}
 			else if(regex_search(_l,m,sine)){
-
+				vector<double> args;
+				while(regex_search(_l,m,value)){
+					args.push_back(getVal(m.str(0)));
+					_l = m.suffix();
+				}
+				aS.srcFunc(aS.cName == 'I', 2, args);
 			}
 			else if(regex_search(_l,m,exp)){
-
+				vector<double> args;
+				while(regex_search(_l,m,value)){
+					args.push_back(getVal(m.str(0)));
+					_l = m.suffix();
+				}
+				aS.srcFunc(aS.cName == 'I', 3, args);
 			}
 			else if(regex_search(_l,m,sffm)){
-
+				vector<double> args;
+				while(regex_search(_l,m,value)){
+					args.push_back(getVal(m.str(0)));
+					_l = m.suffix();
+				}
+				aS.srcFunc(aS.cName == 'I', 4, args);
 			}
 			else if(regex_search(_l,m,pwl)){
-
+				//TODO: This mess
+				cerr<<"PWLs are scary and I'm too tired for their shit, check back later"<<endl;
+				exit(5);
 			}
 			else if(regex_search(_l,m,am)){
-
+				vector<double> args;
+				while(regex_search(_l,m,value)){
+					args.push_back(getVal(m.str(0)));
+					_l = m.suffix();
+				}
+				aS.srcFunc(aS.cName == 'I', 5, args);
 			}
 		}
-		else if(regex_match(l,tranEx)){ //Transient
-
+		else if(regex_match(l,tranEx)){ //Transients be like [timestep] [tstop] [tstart] []
+			rtn = 'T'
+			vector<double> params;
+			string _l = l;
+			smatch m;
+			while(regex_search(_l,m,value)){
+				params.push_back(getVal(m.str(0)));
+				_l = m.suffix();
+			}
+			switch(params.size()){
+				case 2:{ //Just stop time
+					rtn.Tran(double(0), params[1], 10000);
+					break;}
+				case 3:{ //Start and stop time
+					rtn.Tran(params[2], params[1], 10000);
+					break;}
+				case 4:{
+					rtn.Tran(params[2], params[1], params[3]);
+					break;}
+			}
 		}
 		else if(l==".op"){
 			rtn.DC(); //Set the number of steps to 0. This is how we will decide something is a bias point check.
@@ -175,31 +220,31 @@ double getVal(string num){ //The function that a number with a unit prefix (ie 1
 	double val; //double to store the result in
 	switch(num.back()){
 		case 'p': //Pico
-		val = stof(num.substr(0, num.length()-1))*1e-12; //Value is the numerical part of the input string by 10⁻¹²
+		val = stod(num.substr(0, num.length()-1))*1e-12; //Value is the numerical part of the input string by 10⁻¹²
 		break;
 		case 'n': //Nano
-		val = stof(num.substr(0, num.length()-1))*1e-9; //Value is the numerical part of the input string by 10⁻⁹
+		val = stod(num.substr(0, num.length()-1))*1e-9; //Value is the numerical part of the input string by 10⁻⁹
 		break;
 		case 'u': //Micro
-		val = stof(num.substr(0, num.length()-1))*1e-6; //Value is the numerical part of the input string by 10⁻⁶
+		val = stod(num.substr(0, num.length()-1))*1e-6; //Value is the numerical part of the input string by 10⁻⁶
 		break;
 		/*		case 'μ':
-		val = stof(num.substr(0, num.length()-1))*1e-6; //Value is the numerical part of the input string by 10⁻⁶ //μ cannot be stored as a char so disabled for the time being
+		val = stod(num.substr(0, num.length()-1))*1e-6; //Value is the numerical part of the input string by 10⁻⁶ //μ cannot be stored as a char so disabled for the time being
 		break;*/
 		case 'm': //milli
-		val = stof(num.substr(0, num.length()-1))*1e-3; //Value is the numerical part of the input string by 10⁻³
+		val = stod(num.substr(0, num.length()-1))*1e-3; //Value is the numerical part of the input string by 10⁻³
 		break;
 		case 'k': //kilo
-		val = stof(num.substr(0, num.length()-1))*1e3; //Value is the numerical part of the input string by 10³
+		val = stod(num.substr(0, num.length()-1))*1e3; //Value is the numerical part of the input string by 10³
 		break;
 		case 'g': //mega - g as mega is used as MEG
-		val = stof(num.substr(0, num.length()-3))*1e6; //Value is the numerical part of the input string by 10⁶
+		val = stod(num.substr(0, num.length()-3))*1e6; //Value is the numerical part of the input string by 10⁶
 		break;
 		case 'G': //giga
-		val = stof(num.substr(0, num.length()-1))*1e9; //Value is the numerical part of the input string multiplied by 10⁹
+		val = stod(num.substr(0, num.length()-1))*1e9; //Value is the numerical part of the input string multiplied by 10⁹
 		break;
 		default: //If there is no unit prefix. Safeguards are not required here as this function is only called after regex_search or regex_match, which identifies the value as correctly formed.
-		val = stof(num); //Value is the input string
+		val = stod(num); //Value is the input string
 	}
 	return val;
 }
