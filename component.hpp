@@ -21,30 +21,17 @@ Node::Node(){ //Constructorfor either an empty node or the reference node
 	this->ID=0;
 }
 
-class Component{
-public:
+struct Component{
     string cName; //The component name ie "Resistor", "Capacitor" etc.
     string uName; //The name of the component as in the CIR file ie "R1", "Vin" etc.
     int id; //The unique (between components of the same type) identifier for the component.
-    Node* right; //The node to the "right" of this component. This is the cathode/positive pin of polar components.
-    Node* left; //The node to the "left" of this component. This is the anode/negative pin of polar components.
+    Node* pos; //The node to the "right" of this component. This is the cathode/positive pin of polar components.
+    Node* neg; //The node to the "left" of this component. This is the anode/negative pin of polar components.
 };
-class vComponent:Component{ //A linear component such as a resistor, capacitor, inductor or non-dependant source
-public:
+struct vComponent:Component{ //A linear component such as a resistor, capacitor, inductor or non-dependant source
 	double val; //the value of the component in SI units. In sources this is the DC offset.
-    vComponent Resistor(string uName, int id, Node& right, Node& left, double val){
-		vComponent rtn;
-	    rtn.cName = 'R';
-	    rtn.uName = uName;
-	    rtn.id = id;
-	    rtn.right = &right;
-	    rtn.left = &left;
-	    rtn.val = val;
-		return rtn;
-	}
 };
-class Source:Component{ //Only voltage sources here, I heard that current kills
-public:
+struct Source:Component{ //Only voltage sources here, I heard that current kills
 	bool vORc;
 	double DCOffset;
 	function<double(double)> waveform; //use 'waveform(time);' to run function
