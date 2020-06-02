@@ -29,11 +29,11 @@ public:
     Node* right; //The node to the "right" of this component. This is the cathode/positive pin of polar components.
     Node* left; //The node to the "left" of this component. This is the anode/negative pin of polar components.
 };
-class ValuedComponent:Component{ //A linear component such as a resistor, capacitor, inductor or non-dependant source
+class vComponent:Component{ //A linear component such as a resistor, capacitor, inductor or non-dependant source
 public:
 	double val; //the value of the component in SI units. In sources this is the DC offset.
-    ValuedComponent Resistor(string uName, int id, Node& right, Node& left, double val){
-		ValuedComponent rtn;
+    vComponent Resistor(string uName, int id, Node& right, Node& left, double val){
+		vComponent rtn;
 	    rtn.cName = 'R';
 	    rtn.uName = uName;
 	    rtn.id = id;
@@ -65,9 +65,10 @@ Source::Source(double offset, bool b){
 class Sim{ //Currently unused struct for toring the type of simulations. Potentially worth merging with SimParams. Structs DC and Tran inherit from this.
 public:
     string simType;
-	vector<Source> Sources;
-	vector<ValuedComponent> Resistors;
-	vector<Node> Nodes;
+	vector<Source> sources;
+	vector<vComponent> resistors;
+	vector<vComponent> reactComs;
+	vector<Node> nodes;
 };
 class DC : Sim{
     DC();
