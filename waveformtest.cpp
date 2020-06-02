@@ -13,15 +13,15 @@ using namespace std;
 	4: SFFM 		|[-] vOffset	|[-] vAmp		|[-] fCarrier	|[-] mIndex		|[-] fSignal	|[-] tDelay
 	5: PWL 			|[-] t			|[-] v
 	5: PWL File 	|[ ] «File»		//Moved to input. Now shares id 5 with PWL.
-	6: AM 			|[+] aSignal	|[+] fCarrier	|[+] fMod		|[+] cOffset	|[+] tDelay
+	6: AM 			|[-] aSignal	|[-] fCarrier	|[-] fMod		|[-] cOffset	|[-] tDelay
 
 */
 
 
 int main(){
-	vector<double> args{1,3,50,30,5,0.5};
-	Source _1 = Source(false,4,args);
-	double stop = 1;
+	vector<double> args{3,30,1,0.5,1.6};
+	Source _1 = Source(false,6,args);
+	double stop = 7;
 	for(double i = 0; i<stop; i+=stop/10000){
 		cout<<i<<","<<_1.waveform(i)<<endl;
 	}

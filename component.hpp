@@ -376,9 +376,11 @@ Source::Source(bool b, int id, vector<double> args){
 					break;}
 			}
 			this->waveform = [aSignal, fCarrier, fMod, cOffset, tDelay](double time){
-
-
-				return time;
+				if(time<tDelay){
+					return double(0);
+				}
+				double effTime = time - tDelay;
+				return aSignal * (cOffset + sin(2 * M_PI * fMod * effTime)) * sin(2 * M_PI * fCarrier * effTime);
 			};
 			break;}
 	}
