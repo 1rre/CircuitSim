@@ -33,30 +33,32 @@ class ValuedComponent:Component{ //A linear component such as a resistor, capaci
 public:
 	double val; //the value of the component in SI units. In sources this is the DC offset.
     ValuedComponent Resistor(string uName, int id, Node& right, Node& left, double val){
-	    this->cName = 'R';
-	    this->uName = uName;
-	    this->id = id;
-	    this->right = &right;
-	    this->left = &left;
-	    this->val = val;
+		ValuedComponent rtn;
+	    rtn.cName = 'R';
+	    rtn.uName = uName;
+	    rtn.id = id;
+	    rtn.right = &right;
+	    rtn.left = &left;
+	    rtn.val = val;
+		return rtn;
 	}
 };
 class Source:Component{ //Only voltage sources here, I heard that current kills
 public:
 	bool vORc;
 	double DCOffset;
-	function<double(double)> waveform;
+	function<double(double)> waveform; //use 'waveform(time);' to run function
 	Source(function<double(double)> f, double offset, bool b);
-	Source(double &offset, bool b);
+	Source(double offset, bool b);
 };
 Source::Source(function<double(double)> f, double offset, bool b){
 	this->DCOffset = offset;
 	this->waveform = f;
 	this->vORc = b;
 }
-Source::Source(double &offset, bool b){
+Source::Source(double offset, bool b){
 	this->DCOffset = offset;
-	this->waveform = [](double d) {return offset;};
+	this->waveform = [offset](double d) {return offset;};
 	this->vORc = b;
 }
 
@@ -64,7 +66,7 @@ class Sim{ //Currently unused struct for toring the type of simulations. Potenti
 public:
     string simType;
 	vector<Source> Sources;
-	vector<Resistor> Resistors;
+	vector<ValuedComponent> Resistors;
 	vector<Node> Nodes;
 };
 class DC : Sim{
