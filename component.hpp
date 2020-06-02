@@ -299,24 +299,36 @@ Source::Source(bool b, int id, vector<double> args){
 				return vOffset + vAmp * (sin(2 * M_PI * fCarrier * effTime + mIndex * sin(2 * M_PI * fSignal * effTime)));
 			};
 			break;}
-		case 5:{ //Pwl
+		case 5:{ //Pwl //TODO: implement trigger
 			map<double,double> points;
-			for(int i = 0; i<args.size() - 2; i+=2){
+			int end = 0;
+			for(int i = 0; args[i]!=numeric_limits<double>::infinity(); i+=2){
 				points[args[i]] = args[i+1];
+				end = i;
 			}
-			bool b = args.back();
-			this->waveform = [points, b](double time){
-				double effTime = fmod(time,(*prev(points.end())).first);
-				if(effTime < (*points.begin()).first){
-					return (*points.begin()).second;
+			args = vector<double>(args.begin() + end + 3, args.end());
+			end = 0;
+			pair<bool,double> trigger = (args[end],0); //Is the PWL triggered?
+			end++;
+			if(trigger.first){
+				trigger.second = args[end]; //The value at which to trigger
+				end++;
+			}
+			bool repeat_ = args[end]; //True if the PWL repeats forever
+			this->waveform = [points, trigger,repeat_](double time){
+				if(trigger.first){
+					double effTime = fmod(time,(*prev(points.end())).first);
+					if(time < (*points.begin()).first || repeat_ && effTime < (*points.begin()).first){
+						return (*points.begin()).second;
+					}
+					else if(time > (*prev(points.end())).first && !repeat_){
+						return (*prev(points.end())).second;
+					}
+					pair<double,double> t1 = (*points.lower_bound(effTime));
+					pair<double,double> t2 = (*prev(points.lower_bound(effTime)));
+					return ((t2.second - t1.second) / (t2.first - t1.first)) * (effTime - t1.first) + t1.second;
 				}
-				else if(time > (*prev(points.end())).first && !b){
-					return (*prev(points.end())).second;
-				}
-				pair<double,double> t1 = (*points.lower_bound(effTime));
-				pair<double,double> t2 = (*prev(points.lower_bound(effTime)));
-				return ((t2.second - t1.second) / (t2.first - t1.first)) * (effTime - t1.first) + t1.second;
-			};
+			;}
 			break;}
 		/* USE IN GETCOMS:
 		case 6:{ //Pwl File
@@ -348,7 +360,7 @@ Source::Source(bool b, int id, vector<double> args){
 				return ((t2.second - t1.second) / (t2.first - t1.first)) * (time - t1.first) + t1.second;
 			};
 			break;}*/
-		case 6:{ //AM
+		case 7:{ //AM
 			double aSignal = 0, fCarrier = 0, fMod = 0, cOffset = 0, tDelay = 0;
 			switch(args.size()){
 				case 1:{

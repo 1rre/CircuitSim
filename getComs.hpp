@@ -93,6 +93,44 @@ Sim getComs(){
 				PWL ALLOWS REPEAT FOR 5
 				PWLFILE NEEDS TO BE COPIED TO PWL
 			*/
+            Source aS;
+            smatch m;
+            regex_search(l,m,src);
+            aS.uName = m.str(0);
+            aS.cName = aS.uName[0];
+            string _l = m.suffix();
+            regex_search(_l,m,node);
+			int nd;
+			if(m.str(0) == " 0"){
+				nd = 0;
+			}
+			else{
+				nd = stoi(m.str(0).substr(2));
+			}
+			if(nd >= rtn.nodes.size()){
+				for(int i = rtn.nodes.size(); i<=nd;i++){
+					rtn.nodes.push_back(Node(i));
+				}
+			}
+			aS.pos = &rtn.nodes[nd];
+			_l = m.suffix();
+			regex_search(_l,m,node);
+			if(m.str(0) == " 0"){
+				nd = 0;
+			}
+			else{
+				nd = stoi(m.str(0).substr(2));
+			}
+			if(nd >= rtn.nodes.size()){
+				for(int i = rtn.nodes.size(); i<=nd;i++){
+					rtn.nodes.push_back(Node(i));
+				}
+			}
+			aS.neg = &rtn.nodes[nd];
+            aS.id = sCnt;
+            sCnt++;
+
+            //TODO: formulae (or I could crawl into a hole it'd probably be nicer)
 
 		}
 		else if(regex_match(l,tranEx)){ //Transient
