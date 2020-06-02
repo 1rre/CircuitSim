@@ -24,7 +24,7 @@ Sim getComs(){
 	const regex pulse("(PULSE [(]( ?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])");
 	const regex exp("(EXP [(]( ?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])");
 	const regex sffm("(SFFM [(]( ?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])");
-	const regex pwlVals("((PWL) ((VALUE[_]SCALE[_]FACTOR[=](([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))?( )?(TIME[_]SCALE[_]FACTOR[=](([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))( )?)?(((REPEAT FOR)(( [0-9]+)|(EVER)))? [(]((([+]?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?) ([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?))*)|(file[=](.*))[)] (ENDREPEAT)?( )?)+ (TRIGGER V([(]N[0-9][0-9][0-9])[)](([>])|([=])|([<]))(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))?)");
+	const regex pwl("((PWL) ((VALUE[_]SCALE[_]FACTOR[=](([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))?( )?(TIME[_]SCALE[_]FACTOR[=](([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))( )?)?(((REPEAT FOR)(( [0-9]+)|(EVER)))? [(]((([+]?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?) ([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?))*)|(file[=](.*))[)] (ENDREPEAT)?( )?)+ (TRIGGER V([(]N[0-9][0-9][0-9])[)](([>])|([=])|([<]))(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))?)");
 	const regex am("(AM [(](([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])");
 	const regex node("(( 0)|( N[0-9][0-9][0-9]))"); //A node: 0 or N followed by 3 digits.
     const regex vCom("((R|L|C)(([0-9]+)|([A-z]+))+)"); //A named resistor
@@ -129,9 +129,30 @@ Sim getComs(){
 			aS.neg = &rtn.nodes[nd];
             aS.id = sCnt;
             sCnt++;
+			_l = string(m.suffix()).substr(1);
+            if(regex_search(_l,m,dc)){
+				_l = string(m.suffix()).substr(1);
+				vector<double> args{getVal(_l)};
+				aS.srcFunc(aS.cName == 'I', 0, args);
+			}
+			else if(regex_search(_l,m,pulse)){
 
-            //TODO: formulae (or I could crawl into a hole it'd probably be nicer)
+			}
+			else if(regex_search(_l,m,sine)){
 
+			}
+			else if(regex_search(_l,m,exp)){
+
+			}
+			else if(regex_search(_l,m,sffm)){
+
+			}
+			else if(regex_search(_l,m,pwl)){
+
+			}
+			else if(regex_search(_l,m,am)){
+
+			}
 		}
 		else if(regex_match(l,tranEx)){ //Transient
 
