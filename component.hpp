@@ -7,6 +7,10 @@
 #include <cmath>
 #include <limits>
 #include <iostream>
+#include <map>
+#include <fstream>
+#include <regex>
+
 
 using namespace std;
 
@@ -200,7 +204,7 @@ Source::Source(bool b, int id, vector<double> args){
 			};
 			break;}
 		case 3:{ //Exp
-			double vInitial = 0, vPulse = 0, rDelay = 0, rTau = 0, fDelay = 0, fTau = 0;
+			double vInitial = 0, vPulse = 0, rDelay = 0, rTau = 1, fDelay = numeric_limits<double>::infinity(), fTau = numeric_limits<double>::infinity();
 			switch(args.size()){
 				case 1:{ //Vinitial (DC Offset)
 					vInitial = args[0];
@@ -249,16 +253,102 @@ Source::Source(bool b, int id, vector<double> args){
 			break;
 		}
 		case 4:{ //Sffm
+			double vOffset = 0, vAmp = 0, fCarrier = 0, mIndex = 1, fSignal = 0;
+			switch(args.size()){
+				case 1:{
+					vOffset = args[0];
+					break;}
+				case 2:{
 
+					break;}
+				case 3:{
+
+					break;}
+				case 4:{
+
+					break;}
+				case 5:{
+
+					break;}
+			}
+			this->waveform = [vOffset, vAmp, fCarrier, mIndex, fSignal](double time){
+
+
+					return time;
+			};
 			break;}
 		case 5:{ //Pwl
+			map<double,double> points;
+			for(int i = 0; i<args.size() - 1; i+=2){
+				points[args[i]] = args[i+1];
+			}
 
+			this->waveform = [points](double time){
+				if(time < (*points.begin()).first){
+					return (*points.begin()).second;
+				}
+				else if(time > (*prev(points.end())).first){
+					return (*prev(points.end())).second;
+				}
+				pair<double,double> t1 = (*points.lower_bound(time));
+				pair<double,double> t2 = (*prev(points.lower_bound(time)));
+				return ((t2.second - t1.second) / (t2.first - t1.first)) * (time - t1.first) + t1.second;
+			};
 			break;}
 		case 6:{ //Pwl File
-
+			ifstream file;
+			string s = "";
+			for(char a:args){
+				s += a;
+			}
+			file.open(s);
+			const regex com("[,]");
+			if(!file){
+				cerr<<"File does not exist"<<endl;
+				exit(4);
+			}
+			map<double,double> points;
+			smatch m;
+			while(file>>s){
+				regex_search(s,m,com);
+				points[stod(m.prefix())] = stod(m.suffix());
+			}
+			this->waveform = [points](double time){
+				if(time < (*points.begin()).first){
+					return (*points.begin()).second;
+				}
+				else if(time > (*prev(points.end())).first){
+					return (*prev(points.end())).second;
+				}
+				pair<double,double> t1 = (*points.lower_bound(time));
+				pair<double,double> t2 = (*prev(points.lower_bound(time)));
+				return ((t2.second - t1.second) / (t2.first - t1.first)) * (time - t1.first) + t1.second;
+			};
 			break;}
 		case 7:{ //AM
+			double aSignal = 0, fCarrier = 0, fMod = 0, cOffset = 0, tDelay = 0;
+			switch(args.size()){
+				case 1:{
 
+					break;}
+				case 2:{
+
+					break;}
+				case 3:{
+
+					break;}
+				case 4:{
+
+					break;}
+				case 5:{
+
+					break;}
+			}
+			this->waveform = [aSignal, fCarrier, fMod, cOffset, tDelay](double time){
+
+
+				return time;
+			};
 			break;}
 	}
 }
