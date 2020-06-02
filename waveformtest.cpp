@@ -12,8 +12,8 @@ using namespace std;
 	3: Exp 			|[-] vInitial	|[-] vPulse		|[-] rDelay		|[-] rTau		|[-] fDelay		|[-] fTau
 	4: SFFM 		|[~] vOffset	|[~] vAmp		|[~] fCarrier	|[~] mIndex		|[~] fSignal	|[~] tDelay
 	5: PWL 			|[-] t			|[-] v
-	6: PWL File 	|[-] «File»
-	7: AM 			|[~] aSignal	|[~] fCarrier	|[~] fMod		|[~] cOffset	|[~] tDelay
+	5: PWL File 	|[ ] «File»		//Moved to input. Now shares id 5 with PWL.
+	6: AM 			|[~] aSignal	|[~] fCarrier	|[~] fMod		|[~] cOffset	|[~] tDelay
 
 */
 

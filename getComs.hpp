@@ -6,6 +6,7 @@
 //#include <armadillo>
 //#include "Matrix.hpp"
 #include "component.hpp"
+#include <fstream>
 
 using namespace std;
 
@@ -28,7 +29,7 @@ Sim getComs(){
     const regex src("(V|I)(([0-9]+)|([A-z]+))+"); //A named voltage source
     const regex vComEx("(R(([0-9]+)|([A-z]+))+ ((N[0-9][0-9][0-9])|0) ((N[0-9][0-9][0-9])|0) [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)"); //A full line in the CIR file for any resistor
     const regex srcEx("((V|I)(([0-9]+)|([A-z]+))+ ((N[0-9][0-9][0-9])|0) ((N[0-9][0-9][0-9])|0) ((SINE)|(DC))(( [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)|([(][0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?[)])))");//A full line in the CIR file for any type of voltage source, either AC or DC
-    Sim rtn; //This will be our sim. There are many like it but this one is ours. Our sim is our best friend. It is our life. We must master it as we master our lives. Without us, our sim is useless. Without our sim, we are useless. We must run our sim true. We must simulate faster than the programs who are trying to simulate us. We must simulate them before they simulate us. Our sim and us know what counts in simulation is not the circuits you simulate, the current sources we approximate, nor the resistors we model. We know that is is the voltages we calculate that count. Our sim is human, even as us, because it is our life. Thus, we will learn it as a brother. We will learn its weaknesses, its strengths, its functions, its objects, its variables and its bugs. We will keep our sim well commented and optimised. We will become part of each other. Before Dave Thomas, we swear this creed. Our sim and us are the simulators of SPICE circuits. We are the masters of current sources. We are the simulators of life. So it be, until the circuit has been simulated and there are no more current sources, but comma separated values.
+    Sim rtn; //This will be our sim. There are many like it but this one is ours. Our sim is our best friend. It is our life. We must master it as we master our lives. Without us, our sim is useless. Without our sim, we are useless. We must run our sim true. We must simulate faster than the programs who are trying to simulate us. We must simulate them before they simulate us. Our sim and us know what counts in simulation is not the circuits you simulate, the current sources we approximate, nor the resistors we model. We know that it is the voltages we calculate that count. Our sim is human, even as us, because it is our life. Thus, we will learn it as a brother. We will learn its weaknesses, its strengths, its functions, its objects, its variables and its bugs. We will keep our sim well commented and optimised. We will become part of each other. Before Dave Thomas, we swear this creed. Our sim and us are the simulators of SPICE circuits. We are the masters of current sources. We are the simulators of life. So it be, until the circuit has been simulated and there are no more current sources, but comma separated values.
 	rtn.nodes.push_back(Node());
 	vector<string> lines; //The vector of strings read from cin. Used so that the user can input lines without having to wait for them to parse.
     while(cin){ //While data is being inputted
@@ -85,9 +86,14 @@ Sim getComs(){
 			}
 		}
 		else if(regex_match(l,srcEx)){ //Sources
+			/*	 IMPORTANT
+				PWL TIMES CAN BE DEFINED AS +1 ON THE PREVIOUS TIME
+				PWL ALLOWS REPEAT FOR 5
+				PWLFILE NEEDS TO BE COPIED TO PWL
+			*/
 
 		}
-		else if(regex_match(l,tranEx)){
+		else if(regex_match(l,tranEx)){ //Transient
 
 		}
 		else if(l==".op"){

@@ -10,6 +10,7 @@
 #include <map>
 #include <fstream>
 #include <regex>
+#include <cstdio>
 
 
 using namespace std;
@@ -253,25 +254,43 @@ Source::Source(bool b, int id, vector<double> args){
 			break;
 		}
 		case 4:{ //Sffm
-			double vOffset = 0, vAmp = 0, fCarrier = 0, mIndex = 1, fSignal = 0;
+			double vOffset = 0, vAmp = 0, fCarrier = 0, mIndex = 1, fSignal = 0, tDelay = 0;
 			switch(args.size()){
 				case 1:{
 					vOffset = args[0];
 					break;}
 				case 2:{
-
+					vOffset = args[0];
+					vAmp = args[1];
 					break;}
 				case 3:{
-
+					vOffset = args[0];
+					vAmp = args[1];
+					fCarrier = args[2];
 					break;}
 				case 4:{
-
+					vOffset = args[0];
+					vAmp = args[1];
+					fCarrier = args[2];
+					mIndex = args[3];
 					break;}
 				case 5:{
-
+					vOffset = args[0];
+					vAmp = args[1];
+					fCarrier = args[2];
+					mIndex = args[3];
+					fSignal = args[4];
+					break;}
+				case 6:{
+					vOffset = args[0];
+					vAmp = args[1];
+					fCarrier = args[2];
+					mIndex = args[3];
+					fSignal = args[4];
+					tDelay = args[5];
 					break;}
 			}
-			this->waveform = [vOffset, vAmp, fCarrier, mIndex, fSignal](double time){
+			this->waveform = [vOffset, vAmp, fCarrier, mIndex, fSignal,tDelay](double time){
 
 
 					return time;
@@ -282,7 +301,6 @@ Source::Source(bool b, int id, vector<double> args){
 			for(int i = 0; i<args.size() - 1; i+=2){
 				points[args[i]] = args[i+1];
 			}
-
 			this->waveform = [points](double time){
 				if(time < (*points.begin()).first){
 					return (*points.begin()).second;
@@ -295,24 +313,24 @@ Source::Source(bool b, int id, vector<double> args){
 				return ((t2.second - t1.second) / (t2.first - t1.first)) * (time - t1.first) + t1.second;
 			};
 			break;}
+		/* USE IN GETCOMS:
 		case 6:{ //Pwl File
 			ifstream file;
-			string s = "";
-			for(char a:args){
-				s += a;
-			}
-			file.open(s);
-			const regex com("[,]");
+			file.open("input.pwl");
 			if(!file){
 				cerr<<"File does not exist"<<endl;
 				exit(4);
 			}
+			const regex com("[,]");
 			map<double,double> points;
 			smatch m;
+			string s = "";
 			while(file>>s){
 				regex_search(s,m,com);
 				points[stod(m.prefix())] = stod(m.suffix());
 			}
+			file.close();
+			remove("input.pwl");
 			this->waveform = [points](double time){
 				if(time < (*points.begin()).first){
 					return (*points.begin()).second;
@@ -324,24 +342,34 @@ Source::Source(bool b, int id, vector<double> args){
 				pair<double,double> t2 = (*prev(points.lower_bound(time)));
 				return ((t2.second - t1.second) / (t2.first - t1.first)) * (time - t1.first) + t1.second;
 			};
-			break;}
-		case 7:{ //AM
+			break;}*/
+		case 6:{ //AM
 			double aSignal = 0, fCarrier = 0, fMod = 0, cOffset = 0, tDelay = 0;
 			switch(args.size()){
 				case 1:{
-
+					aSignal = args[0];
 					break;}
 				case 2:{
-
+					aSignal = args[0];
+					fCarrier = args[1];
 					break;}
 				case 3:{
-
+					aSignal = args[0];
+					fCarrier = args[1];
+					fMod = args[2];
 					break;}
 				case 4:{
-
+					aSignal = args[0];
+					fCarrier = args[1];
+					fMod = args[2];
+					cOffset = args[3];
 					break;}
 				case 5:{
-
+					aSignal = args[0];
+					fCarrier = args[1];
+					fMod = args[2];
+					cOffset = args[3];
+					tDelay = args[4];
 					break;}
 			}
 			this->waveform = [aSignal, fCarrier, fMod, cOffset, tDelay](double time){
