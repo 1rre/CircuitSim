@@ -3,9 +3,6 @@
 
 #include <iostream>
 #include <regex>
-#include <any>
-#include <string>
-#include <cmath>
 //#include <armadillo>
 //#include "Matrix.hpp"
 #include "component.hpp"
@@ -17,15 +14,18 @@ double getVal(string num);
 Sim getComs(){
 	int cCnt = 0;
 	int sCnt = 0;
+	int rCnt = 0;
     const regex comment("([*].*)"); //* followed by anything, ie a comment (haha meta)
     const regex tranEx("([.]tran 0 [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s 0 [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s)"); //A transient simulation command. Interestingly this has units unlike the others.
     const regex dc("DC [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?"); //A DC source
     const regex sine("SINE ([(][0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?[)])"); //An AC source with SINE input
-    const regex node("(( 0)|( N[0-9][0-9][0-9]))"); //A node: 0 or N followed by 3 digits.
+	const regex pulse("");
+	const regex exp("");
+	const regex sffm("");
+	const regex pwl("");
+	const regex node("(( 0)|( N[0-9][0-9][0-9]))"); //A node: 0 or N followed by 3 digits.
     const regex vCom("((R|L|C)(([0-9]+)|([A-z]+))+)"); //A named resistor
-    const regex vSrc("V(([0-9]+)|([A-z]+))+"); //A named voltage source
-    const regex cSrc("I(([0-9]+)|([A-z]+))+"); //A named current source
-    const regex value(" ([0-9]+)(([.][0-9]+)?)((p|n|u|µ|m|k|(Meg)|G)?)"); //A double value including the unit prefix
+    const regex src("(V|I)(([0-9]+)|([A-z]+))+"); //A named voltage source
     const regex vComEx("(R(([0-9]+)|([A-z]+))+ ((N[0-9][0-9][0-9])|0) ((N[0-9][0-9][0-9])|0) [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)"); //A full line in the CIR file for any resistor
     const regex srcEx("((V|I)(([0-9]+)|([A-z]+))+ ((N[0-9][0-9][0-9])|0) ((N[0-9][0-9][0-9])|0) ((SINE)|(DC))(( [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)|([(][0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?[)])))");//A full line in the CIR file for any type of voltage source, either AC or DC
     Sim rtn; //This will be our sim. There are many like it but this one is ours. Our sim is our best friend. It is our life. We must master it as we master our lives. Without us, our sim is useless. Without our sim, we are useless. We must run our sim true. We must simulate faster than the programs who are trying to simulate us. We must simulate them before they simulate us. Our sim and us know what counts in simulation is not the circuits you simulate, the current sources we approximate, nor the resistors we model. We know that is is the voltages we calculate that count. Our sim is human, even as us, because it is our life. Thus, we will learn it as a brother. We will learn its weaknesses, its strengths, its functions, its objects, its variables and its bugs. We will keep our sim well commented and optimised. We will become part of each other. Before Dave Thomas, we swear this creed. Our sim and us are the simulators of SPICE circuits. We are the masters of current sources. We are the simulators of life. So it be, until the circuit has been simulated and there are no more current sources, but comma separated values.
@@ -37,14 +37,12 @@ Sim getComs(){
 		lines.push_back(line); //Add the line to the vector of lines.
 	}
 	for(string l:lines){
-		if(regex_match(l,vComEx)){
+		if(regex_match(l,vComEx)){ //Resistors, capacitors and inductors
 			vComponent v;
-			v.id = cCnt;
-			cCnt++;
 			smatch m;
 			regex_search(l, m, vCom);
-			v.uName = m.str(0);
-			v.cName = v.uName[0];
+			v.uName = m.str(0); //2 of 6
+			v.cName = v.uName[0]; //3 of 6
 			string _l = m.suffix();
 			regex_search(_l,m,node);
 			int nd;
@@ -59,7 +57,7 @@ Sim getComs(){
 					rtn.nodes.push_back(Node(i));
 				}
 			}
-			v.pos = &rtn.nodes[nd];
+			v.pos = &rtn.nodes[nd]; //4 of 6
 			_l = m.suffix();
 			regex_search(_l,m,node);
 			if(m.str(0) == " 0"){
@@ -73,9 +71,20 @@ Sim getComs(){
 					rtn.nodes.push_back(Node(i));
 				}
 			}
-			v.neg = &rtn.nodes[nd];
+			v.neg = &rtn.nodes[nd]; //5 of 6
+			v.val = getVal(string(m.suffix()).substr(1));
+			if(v.cName == 'R'){
+				v.id = rCnt; //1 of 6
+				rCnt++;
+				rtn.resistors.push_back(v);
+			}
+			else{
+				v.id = cCnt; //1 of 6
+				cCnt++;
+				rtn.reactComs.push_back(v);
+			}
 		}
-		else if(regex_match(l,srcEx)){
+		else if(regex_match(l,srcEx)){ //Sources
 
 		}
 		else if(regex_match(l,tranEx)){
