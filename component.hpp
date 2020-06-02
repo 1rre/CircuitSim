@@ -301,19 +301,21 @@ Source::Source(bool b, int id, vector<double> args){
 			break;}
 		case 5:{ //Pwl
 			map<double,double> points;
-			for(int i = 0; i<args.size() - 1; i+=2){
+			for(int i = 0; i<args.size() - 2; i+=2){
 				points[args[i]] = args[i+1];
 			}
-			this->waveform = [points](double time){
-				if(time < (*points.begin()).first){
+			bool b = args.back();
+			this->waveform = [points, b](double time){
+				double effTime = fmod(time,(*prev(points.end())).first);
+				if(effTime < (*points.begin()).first){
 					return (*points.begin()).second;
 				}
-				else if(time > (*prev(points.end())).first){
+				else if(time > (*prev(points.end())).first && !b){
 					return (*prev(points.end())).second;
 				}
-				pair<double,double> t1 = (*points.lower_bound(time));
-				pair<double,double> t2 = (*prev(points.lower_bound(time)));
-				return ((t2.second - t1.second) / (t2.first - t1.first)) * (time - t1.first) + t1.second;
+				pair<double,double> t1 = (*points.lower_bound(effTime));
+				pair<double,double> t2 = (*prev(points.lower_bound(effTime)));
+				return ((t2.second - t1.second) / (t2.first - t1.first)) * (effTime - t1.first) + t1.second;
 			};
 			break;}
 		/* USE IN GETCOMS:
