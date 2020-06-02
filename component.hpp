@@ -3,6 +3,7 @@
 
 #include <string>
 #include <functional>
+#include <vector>
 
 using namespace std;
 
@@ -28,33 +29,35 @@ public:
     Node* right; //The node to the "right" of this component. This is the cathode/positive pin of polar components.
     Node* left; //The node to the "left" of this component. This is the anode/negative pin of polar components.
 };
-class Resistor:Component{ //A linear component such as a resistor, capacitor, inductor or non-dependant source
+class ValuedComponent:Component{ //A linear component such as a resistor, capacitor, inductor or non-dependant source
 public:
 	double val; //the value of the component in SI units. In sources this is the DC offset.
-    Resistor(string uName, int id, Node& right, Node& left, double val);
+    ValuedComponent Resistor(string uName, int id, Node& right, Node& left, double val){
+	    this->cName = 'R';
+	    this->uName = uName;
+	    this->id = id;
+	    this->right = &right;
+	    this->left = &left;
+	    this->val = val;
+	}
 };
-Resistor::Resistor(string uName, int id, Node& right, Node& left, double val){
-    this->cName = "Resistor";
-    this->uName = uName;
-    this->id = id;
-    this->right = &right;
-    this->left = &left;
-    this->val = val;
-}
 class Source:Component{ //Only voltage sources here, I heard that current kills
 public:
-	double DCOffset; //For use in case of DC bias point check only. 500€ fine for misuse.
-	function<double(double)> waveform; //Functional programmers represent
-	Source(function<double(double)> f, double offset);
-	Source(double offset);
+	bool vORc;
+	double DCOffset;
+	function<double(double)> waveform;
+	Source(function<double(double)> f, double offset, bool b);
+	Source(double &offset, bool b);
 };
-Source::Source(function<double(double)> f, double offset){
+Source::Source(function<double(double)> f, double offset, bool b){
 	this->DCOffset = offset;
 	this->waveform = f;
+	this->vORc = b;
 }
-Source::Source(double offset){
+Source::Source(double &offset, bool b){
 	this->DCOffset = offset;
 	this->waveform = [](double d) {return offset;};
+	this->vORc = b;
 }
 
 class Sim{ //Currently unused struct for toring the type of simulations. Potentially worth merging with SimParams. Structs DC and Tran inherit from this.
@@ -79,13 +82,18 @@ class Tran:Sim{
     Tran(double start, double end, int steps);
 };
 Tran::Tran(double start, double end, double timeStep){
+	this->simType = "Tran";
     this->start = start;
     this->end = end;
     this->timeStep = timeStep;
     this->steps = ((start-end)/timeStep);
 }
 Tran::Tran(double start, double end, int steps){
+	this->simType = "Tran";
     this->start = start;
+	this->end = end;
+	this->steps = steps;
+	this->timeStep = (end-start)/steps;
 }
 
 #endif
