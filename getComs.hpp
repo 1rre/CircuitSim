@@ -22,8 +22,7 @@ Sim GetComs(){
     const regex node("(( 0)|( N[0-9][0-9][0-9]))"); //A node: 0 or N followed by 3 digits.
     const regex res("(R(([0-9]+)|([A-z]+))+)"); //A named resistor
     const regex vSrc("V(([0-9]+)|([A-z]+))+"); //A named voltage source
-    const regex cSrc("I(([0-9]+)|([A-z]+)#include <functional>
-#include <cmath>)+"); //A named current source
+    const regex cSrc("I(([0-9]+)|([A-z]+))+"); //A named current source
     const regex value(" ([0-9]+)(([.][0-9]+)?)((p|n|u|µ|m|k|(Meg)|G)?)"); //A double value including the unit prefix
     const regex tranEx("([.]tran 0 [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s 0 [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s)"); //A transient simulation command. Interestingly this has units unlike the others.
     const regex cSrcEx("(I(([0-9]+)|([A-z]+))+ ((N[0-9][0-9][0-9])|0) ((N[0-9][0-9][0-9])|0) ((SINE)|(DC))(( [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)|([(][0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?[)])))"); //A full line in the CIR file for any type of current source, either AC or DC
