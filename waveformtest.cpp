@@ -8,7 +8,7 @@ using namespace std;
 	0: DC			|[-] Offset
 	1: Pulse		|[-] vInitial	|[-] vOn		|[-] tDelay		|[x] tRise		|[x] tFall		|[x] tOn		|[x] Period		|[o] nCycles
 	2: Sine 		|[-] vOffset	|[-] vAmp		|[-] freq		|[-] tDelay		|[-] theta		|[o] phi		|[o] nCycles
-	3: Exp 			|[ ] vInitial	|[ ] vPulse		|[ ] rDelay		|[ ] rTau		|[ ] fDelay		|[ ] fTau
+	3: Exp 			|[o] vInitial	|[o] vPulse		|[o] rDelay		|[o] rTau		|[o] fDelay		|[o] fTau
 	4: LFFM 		|[ ] dcOffset	|[ ] vAmp		|[ ] fCarrier	|[ ] mIndex		|[ ] fSignal	|[ ] tDelay
 	5: PWL 			|[ ] t			|[ ] v			|[ ] tDelay
 	6: PWL File 	|[ ] «File» 	|[ ] tDelay
