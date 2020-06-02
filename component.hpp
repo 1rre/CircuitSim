@@ -62,6 +62,7 @@ public:
     string simType;
 	vector<Source> Sources;
 	vector<Resistor> Resistors;
+	vector<Node> Nodes;
 };
 class DC : Sim{
     DC();
@@ -86,6 +87,5 @@ Tran::Tran(double start, double end, double timeStep){
 Tran::Tran(double start, double end, int steps){
     this->start = start;
 }
-
 
 #endif
