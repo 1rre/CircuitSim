@@ -1,6 +1,4 @@
-#include <iostream>
 #include "getComs.hpp"
-#include <fstream>
 
 using namespace std;
 
@@ -31,7 +29,9 @@ using namespace std;
 
 
 int main(){
-	cout<<"a,b"<<endl;
+	int x = false;
+	cout<<x<<endl;
+/*	cout<<"a,b"<<endl;
 	Sim s = getComs();
 	double start = 0;
 	double finish = 5e-3;
@@ -41,5 +41,5 @@ int main(){
 				cout<<i<<","<<x.waveform(i)<<endl;
 			}
 		}
-	}
+	}*/
 }

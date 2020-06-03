@@ -127,6 +127,7 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 						}
 						break;}
 				}
+				this->DCOffset = vInitial;
 				this->waveform = [vInitial, vOn, tDelay, tRise, tFall, tOn, tPeriod, nCycles](double time){
 					if(time <= tDelay || time > tPeriod * nCycles + tDelay){
 						return vInitial;
@@ -190,6 +191,7 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 						nCycles = args[6];
 						break;}
 				}
+				this->DCOffset = vOffset;
 				this->waveform = [vOffset, vAmp, freq, tDelay, theta, phi, nCycles](double time){
 					double effTime = tDelay - time;
 					if(time < tDelay){
@@ -239,7 +241,8 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 						fDelay = args[4];
 						fTau = args[5];
 						break;}
-					}
+				}
+				this->DCOffset = vInitial;
 				this->waveform = [vInitial,vPulse,rDelay,rTau,fDelay,fTau](double time){
 					double rtn = vInitial;
 					if(time > rDelay){
@@ -289,6 +292,7 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 						tDelay = args[5];
 						break;}
 				}
+				this->DCOffset = vOffset;
 				this->waveform = [vOffset, vAmp, fCarrier, mIndex, fSignal,tDelay](double time){
 					if(time<tDelay){
 						return vOffset;
@@ -307,6 +311,7 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 				args = vector<double>(args.begin() + end + 3, args.end());
 				end = 0;
 				bool repeat_ = args[end]; //True if the PWL repeats forever
+				this->DCOffset = args[1];
 				this->waveform = [points,repeat_](double time){
 					double effTime = fmod(time,(*prev(points.end())).first);
 					if(time < (*points.begin()).first || (repeat_ && effTime < (*points.begin()).first)){
@@ -379,6 +384,7 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 						tDelay = args[4];
 						break;}
 				}
+				this->DCOffset = 0;
 				this->waveform = [aSignal, fCarrier, fMod, cOffset, tDelay](double time){
 					if(time<tDelay){
 						return double(0);
@@ -415,7 +421,7 @@ struct DepSource:Source{
 
 				break;}
 			case 3:{ //Current Trigger
-				
+
 				break;}
 			case 4:{ //Voltage Dependant
 
@@ -426,7 +432,7 @@ struct DepSource:Source{
 		}
 	}
 };
-class Sim{ //Currently unused struct for toring the type of simulations. Potentially worth merging with SimParams. Structs DC and Tran inherit from this.
+class Sim{
 public:
 	vector<Source> sources; //Independent voltage & current sources ie DC 5v, SINE 5v amplitude / 3v dc offset etc.
 	vector<Resistor> resistors; //Resistors ie R1 between nodes 2 & 3 with value 3.4kΩ
