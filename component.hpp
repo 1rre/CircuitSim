@@ -406,7 +406,7 @@ class Sim{ //Currently unused struct for toring the type of simulations. Potenti
 public:
 	vector<Source> sources; //Independent voltage & current sources ie DC 5v, SINE 5v amplitude / 3v dc offset etc.
 	vector<Resistor> resistors; //Resistors ie R1 between nodes 2 & 3 with value 3.4kΩ
-	vector<DepSource> dSources; //Dependent voltage & current sources (including capacitors and resistors) ie DC 3V if(V(node 1) > 1.5V), 1V otherwise
+	vector<DepSource> dSources; //Dependent voltage & current sources (including capacitors and inductors) ie DC 3V if(V(node 1) > 1.5V), 1V otherwise
 	vector<Node> nodes; //The wires between the components.
 	double timeStep;
 	double start;
