@@ -200,8 +200,6 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 					else if(time > nCycles / (freq) + tDelay){
 						effTime = -nCycles / (freq);
 					}
-
-
 					return vOffset + vAmp * exp(theta * effTime) * sin(2 * M_PI * freq * effTime + phi);
 				};
 				break;}

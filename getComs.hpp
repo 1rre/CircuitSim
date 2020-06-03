@@ -13,8 +13,8 @@ using namespace std;
 double getVal(string num);
 
 Sim getComs(){
-	int dCnt = 0;
-	int sCnt = 0;
+	int iCnt = 0;
+	int vCnt = 0;
 	int rCnt = 0;
 	//TODO: Add dSource regex.
 	const regex value("([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)");//(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)
@@ -84,13 +84,19 @@ Sim getComs(){
 			}
 			else{ //Inductor or Capacitor
 				DepSource dS;
-				dS.id = dCnt;
-				dCnt++;
 				dS.cName = v.cName;
 				dS.uName = v.uName;
 				dS.DCOffset = 0;
 				dS.pos = v.pos;
 				dS.neg = v.neg;
+				if(dS.cName == 'C'){
+					dS.id = iCnt;
+					iCnt++;
+				}
+				else{
+					dS.id = vCnt;
+					vCnt++;
+				}
 				vector<double> args{v.val,double(dS.pos->ID),double(dS.neg->ID)};
 				dS.srcFunc(dS.cName=='C',args);
 				rtn.dSources.push_back(dS);
@@ -131,8 +137,10 @@ Sim getComs(){
 				}
 			}
 			aS.neg = &rtn.nodes[nd];
-            aS.id = sCnt;
-            sCnt++;
+			if(aS.cName != 'c'){
+				aS.id = vCnt;
+	            vCnt++;
+			}
 			_l = string(m.suffix()).substr(1);
             if(regex_search(_l,m,dc)){
 				_l = string(m.str(0)).substr(3);
@@ -186,7 +194,7 @@ Sim getComs(){
 			}
 			rtn.sources.push_back(aS);
 		}
-		else if(regex_match(l,tranEx)){ //Transients be like [timestep] [tstop] [tstart] []
+		else if(regex_match(l,tranEx)){ //Transients be like 0 [tstop] [tstart] [timestep]
 			vector<double> params;
 			string _l = l;
 			smatch m;
