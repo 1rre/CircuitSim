@@ -243,9 +243,9 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 					double rtn = vInitial;
 					if(time > rDelay){
 						rtn += (vPulse - vInitial) * (1 - exp((rDelay - time) / rTau));
-						if(time > rDelay + fDelay){
-							rtn += (vInitial - vPulse) * (1 - exp((rDelay + fDelay - time) / fTau));
-						}
+					}
+					if(time>fDelay){
+						rtn += (vInitial - vPulse) * (1 - exp((fDelay - time) / fTau));
 					}
 					return rtn;
 				};
@@ -360,7 +360,7 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 					return ((t2.second - t1.second) / (t2.first - t1.first)) * (time - t1.first) + t1.second;
 				};
 				break;}*/
-			case 7:{ //AM
+			case 6:{ //AM
 				double aSignal = 0, fCarrier = 0, fMod = 0, cOffset = 0, tDelay = 0;
 				switch(args.size()){
 					case 1:{
