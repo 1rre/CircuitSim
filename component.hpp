@@ -11,9 +11,11 @@
 #include <fstream>
 #include <regex>
 #include <cstdio>
+#include <armadillo>
 
 
 using namespace std;
+using namespace arma;
 
 class Node{ //A node. As the nodes are numbered 0 or from N001 to N999 we can give them a unique integer ID directly from the CIR file
 public:
@@ -36,15 +38,13 @@ struct Component{
     Node* pos; //The node to the "right" of this component. This is the cathode/positive pin of polar components.
     Node* neg; //The node to the "left" of this component. This is the anode/negative pin of polar components.
 };
-struct vComponent:Component{ //A linear component such as a resistor, capacitor, inductor or non-dependant source
+struct Resistor:Component{ //A linear component such as a resistor, capacitor, inductor or non-dependant source
 	double val; //the value of the component in SI units. In sources this is the DC offset.
 };
 struct Source:Component{ //Only voltage sources here, I heard that current kills
-	bool cSource;
 	double DCOffset;
 	function<double(double)> waveform; //use 'waveform(time);' to run function
-	void srcFunc(bool b, int id, vector<double> args){
-		this->cSource = b;
+	void srcFunc(int id, vector<double> args){
 		switch(id){
 			case 0: //DC
 				this->DCOffset = args[0];
@@ -305,29 +305,18 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 				}
 				args = vector<double>(args.begin() + end + 3, args.end());
 				end = 0;
-				pair<bool,double> trigger(args[end],0); //Is the PWL triggered?
-				end++;
-				if(trigger.first){
-					trigger.second = args[end]; //The value at which to trigger
-					end++;
-				}
 				bool repeat_ = args[end]; //True if the PWL repeats forever
-				this->waveform = [points, trigger,repeat_](double time){
-					if(trigger.first){
-						double effTime = fmod(time,(*prev(points.end())).first);
-						if(time < (*points.begin()).first || (repeat_ && effTime < (*points.begin()).first)){
-							return (*points.begin()).second;
-						}
-						else if(time > (*prev(points.end())).first && !repeat_){
-							return (*prev(points.end())).second;
-						}
-						pair<double,double> t1 = (*points.lower_bound(effTime));
-						pair<double,double> t2 = (*prev(points.lower_bound(effTime)));
-						return ((t2.second - t1.second) / (t2.first - t1.first)) * (effTime - t1.first) + t1.second;
-					}
-					else{
+				this->waveform = [points,repeat_](double time){
+					double effTime = fmod(time,(*prev(points.end())).first);
+					if(time < (*points.begin()).first || (repeat_ && effTime < (*points.begin()).first)){
 						return (*points.begin()).second;
 					}
+					else if(time > (*prev(points.end())).first && !repeat_){
+						return (*prev(points.end())).second;
+					}
+					pair<double,double> t1 = (*points.lower_bound(effTime));
+					pair<double,double> t2 = (*prev(points.lower_bound(effTime)));
+					return ((t2.second - t1.second) / (t2.first - t1.first)) * (effTime - t1.first) + t1.second;
 				};
 				break;}
 			/* USE IN GETCOMS:
@@ -400,11 +389,24 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 		}
 	}
 };
+struct DepSource:Source{
+	function<pair<double, Mat<double>>(double)> waveform;
+	void srcFunc(int id, vector<double> args, Mat<double> mx){
+		switch(id){
+			case 0:{ //
+
+			}
+			case 1:{
+
+			}
+		}
+	}
+};
 class Sim{ //Currently unused struct for toring the type of simulations. Potentially worth merging with SimParams. Structs DC and Tran inherit from this.
 public:
 	vector<Source> sources;
-	vector<vComponent> resistors;
-	vector<vComponent> reactComs;
+	vector<Resistor> resistors;
+	vector<DepSource> dSources;
 	vector<Node> nodes;
 	double timeStep;
 	double start;
