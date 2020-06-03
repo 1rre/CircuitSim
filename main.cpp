@@ -16,9 +16,7 @@ int main(){
 		cout<<"time";
 	}
 	for(int i = 1; i<_.nodes.size(); i++){
-		if(i>1){
-			cout<<",";
-		}
+		cout<<",";
 		cout<<"V(N"<<i<<")";
 	}
 	for(auto iS : _.sources){
@@ -51,14 +49,14 @@ int main(){
 		my = maQ * mz;
 		mxPre2 = mxPre1;
 		solve(mxPre1,maR,my);
-		if(time>_.start){
-			string s;
+		if(time > _.start){
+			string s = to_string(time);
 			for(double pt : mxPre1.row(0)){
 				s += ",";
 				s += pt;
 			}
 			s+='\n';
-			cout<<s.substr(1)<<endl;
+			cout<<s<<endl;
 		}
 	}
 }
