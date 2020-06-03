@@ -51,7 +51,7 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 				this->waveform = [args](double time){ return args[0]; };
 			break;
 			case 1:{ //Pulse
-				double vInitial = 0, vOn = 0, tDelay = 0, tRise = 0, tFall = 0, tOn = 0, tPeriod = 0, nCycles = numeric_limits<double>::infinity();
+				double vInitial = 0, vOn = 0, tDelay = 0, tRise = 0, tFall = 0, tOn = 0, tPeriod = numeric_limits<double>::infinity(), nCycles = numeric_limits<double>::infinity();
 				switch(args.size()){
 					case 1:{ //Vinitial
 						vInitial = args[0];
@@ -70,7 +70,6 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 						vOn = args[1];
 						tDelay = args[2];
 						tRise = args[3];
-						tPeriod = tRise;
 						break;}
 					case 5:{ //Prevs & Tfall
 						vInitial = args[0];
@@ -78,7 +77,6 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 						tDelay = args[2];
 						tRise = args[3];
 						tFall = args[4];
-						tPeriod = tRise + tFall;
 						break;}
 					case 6:{ //Prevs & Ton
 						vInitial = args[0];
@@ -87,7 +85,6 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 						tRise = args[3];
 						tFall = args[4];
 						tOn = args[5];
-						tPeriod = tRise + tFall + tOn;
 						break;}
 					case 7:{ //Prevs & Tperiod
 						vInitial = args[0];
@@ -193,14 +190,16 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 						break;}
 				}
 				this->waveform = [vOffset, vAmp, freq, tDelay, theta, phi, nCycles](double time){
+					double effTime = tDelay - time;
 					if(time < tDelay){
-						return vOffset + vAmp * sin(phi / (2 * M_PI));
+						return vOffset + vAmp * sin(phi);
 					}
-					else if(time > nCycles / freq + tDelay){
-						return vOffset + vAmp * exp(theta * (nCycles/freq)) * sin(2 * M_PI * nCycles + phi / (2 * M_PI));
+					else if(time > nCycles / (freq) + tDelay){
+						effTime = -nCycles / (freq);
 					}
-					const double effTime = tDelay - time;
-					return vOffset + vAmp * exp(theta * effTime) * sin(2 * M_PI * freq * effTime + phi / (2 * M_PI));
+
+
+					return vOffset + vAmp * exp(theta * effTime) * sin(2 * M_PI * freq * effTime + phi);
 				};
 				break;}
 			case 3:{ //Exp
@@ -316,7 +315,7 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 				this->waveform = [points, trigger,repeat_](double time){
 					if(trigger.first){
 						double effTime = fmod(time,(*prev(points.end())).first);
-						if(time < (*points.begin()).first || repeat_ && effTime < (*points.begin()).first){
+						if(time < (*points.begin()).first || (repeat_ && effTime < (*points.begin()).first)){
 							return (*points.begin()).second;
 						}
 						else if(time > (*prev(points.end())).first && !repeat_){

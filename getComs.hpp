@@ -16,7 +16,7 @@ Sim getComs(){
 	int cCnt = 0;
 	int sCnt = 0;
 	int rCnt = 0;
-	const regex value(" (([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)");
+	const regex value("([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)");//(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)
     const regex comment("([*].*)"); //* followed by anything, ie a comment (haha meta)
     const regex tranEx("([.]tran 0 [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s?( [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s?)*( [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s?)*)"); //A transient simulation command. Interestingly this has units unlike the others.
     const regex dc("(DC (([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))"); //A DC source
@@ -131,7 +131,7 @@ Sim getComs(){
             sCnt++;
 			_l = string(m.suffix()).substr(1);
             if(regex_search(_l,m,dc)){
-				_l = string(m.suffix()).substr(1);
+				_l = string(m.str(0)).substr(3);
 				vector<double> args{getVal(_l)};
 				aS.srcFunc(aS.cName == 'I', 0, args);
 			}
@@ -180,9 +180,9 @@ Sim getComs(){
 				}
 				aS.srcFunc(aS.cName == 'I', 5, args);
 			}
+			rtn.sources.push_back(aS);
 		}
 		else if(regex_match(l,tranEx)){ //Transients be like [timestep] [tstop] [tstart] []
-			rtn = 'T'
 			vector<double> params;
 			string _l = l;
 			smatch m;
