@@ -12,6 +12,7 @@
 #include <regex>
 #include <cstdio>
 #include <armadillo>
+#include <tuple>
 
 
 using namespace std;
@@ -390,13 +391,36 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 	}
 };
 struct DepSource:Source{
-	function<pair<double, Mat<double>>(double)> waveform;
-	void srcFunc(int id, vector<double> args, Mat<double> mx){
+	function<double(double,Mat<double>,double,Mat<double>)> waveform;
+	void srcFunc(int id, vector<double> args){
 		switch(id){
-			case 0:{ //
+			case 0:{ //Inductor
+					double lValue = args[0], posNode = args[1], negNode = args[2];
+					this->waveform = [posNode, negNode](double tPre1, Mat<double> mxPre1, double tPre2, Mat<double> mxPre2){
+						const double vPre1 = mxPre1(posNode,0) - mxPre1(negNode,0); //Voltage across inductor at t-timestep
+						const double vPre2 = mxPre2(posNode,0) - mxPre2(negNode,0); //Voltage across inductor at t-2·timestep
+						return 2 * vPre1 - vPre2;
+					};
+				break;}
+			case 1:{ //Capacitor
+				double cValue = args[0], posNode = args[1], negNode = args[2];
+				this->waveform = [cValue, posNode, negNode](double tPre1, Mat<double> mxPre1, double tPre2, Mat<double> mxPre2){
+					const double vPre1 = mxPre1(posNode,0) - mxPre1(negNode,0); //Voltage across inductor at t-timestep
+					const double vPre2 = mxPre2(posNode,0) - mxPre2(negNode,0); //Voltage across inductor at t-2·timestep
+					const double dVdT = (vPre1-vPre2)/(tPre1 - tPre2);
+					return cValue * dVdT;
+				};
+				break;}
+			case 2:{ //Voltage Trigger
 
-			}
-			case 1:{
+				break;}
+			case 3:{ //Current Trigger
+				
+				break;}
+			case 4:{ //Voltage Dependant
+
+				break;}
+			case 5:{ //Current Dependant
 
 			}
 		}
