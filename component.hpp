@@ -11,9 +11,12 @@
 #include <fstream>
 #include <regex>
 #include <cstdio>
+#include <armadillo>
+#include <tuple>
 
 
 using namespace std;
+using namespace arma;
 
 class Node{ //A node. As the nodes are numbered 0 or from N001 to N999 we can give them a unique integer ID directly from the CIR file
 public:
@@ -36,15 +39,13 @@ struct Component{
     Node* pos; //The node to the "right" of this component. This is the cathode/positive pin of polar components.
     Node* neg; //The node to the "left" of this component. This is the anode/negative pin of polar components.
 };
-struct vComponent:Component{ //A linear component such as a resistor, capacitor, inductor or non-dependant source
+struct Resistor:Component{ //A linear component such as a resistor, capacitor, inductor or non-dependant source
 	double val; //the value of the component in SI units. In sources this is the DC offset.
 };
 struct Source:Component{ //Only voltage sources here, I heard that current kills
-	bool cSource;
 	double DCOffset;
 	function<double(double)> waveform; //use 'waveform(time);' to run function
-	void srcFunc(bool b, int id, vector<double> args){
-		this->cSource = b;
+	void srcFunc(int id, vector<double> args){
 		switch(id){
 			case 0: //DC
 				this->DCOffset = args[0];
@@ -305,29 +306,18 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 				}
 				args = vector<double>(args.begin() + end + 3, args.end());
 				end = 0;
-				pair<bool,double> trigger(args[end],0); //Is the PWL triggered?
-				end++;
-				if(trigger.first){
-					trigger.second = args[end]; //The value at which to trigger
-					end++;
-				}
 				bool repeat_ = args[end]; //True if the PWL repeats forever
-				this->waveform = [points, trigger,repeat_](double time){
-					if(trigger.first){
-						double effTime = fmod(time,(*prev(points.end())).first);
-						if(time < (*points.begin()).first || (repeat_ && effTime < (*points.begin()).first)){
-							return (*points.begin()).second;
-						}
-						else if(time > (*prev(points.end())).first && !repeat_){
-							return (*prev(points.end())).second;
-						}
-						pair<double,double> t1 = (*points.lower_bound(effTime));
-						pair<double,double> t2 = (*prev(points.lower_bound(effTime)));
-						return ((t2.second - t1.second) / (t2.first - t1.first)) * (effTime - t1.first) + t1.second;
-					}
-					else{
+				this->waveform = [points,repeat_](double time){
+					double effTime = fmod(time,(*prev(points.end())).first);
+					if(time < (*points.begin()).first || (repeat_ && effTime < (*points.begin()).first)){
 						return (*points.begin()).second;
 					}
+					else if(time > (*prev(points.end())).first && !repeat_){
+						return (*prev(points.end())).second;
+					}
+					pair<double,double> t1 = (*points.lower_bound(effTime));
+					pair<double,double> t2 = (*prev(points.lower_bound(effTime)));
+					return ((t2.second - t1.second) / (t2.first - t1.first)) * (effTime - t1.first) + t1.second;
 				};
 				break;}
 			/* USE IN GETCOMS:
@@ -400,12 +390,48 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 		}
 	}
 };
+struct DepSource:Source{
+	function<double(double,Mat<double>,double,Mat<double>)> waveform;
+	void srcFunc(int id, vector<double> args){
+		switch(id){
+			case 0:{ //Inductor
+					double lValue = args[0], posNode = args[1], negNode = args[2];
+					this->waveform = [posNode, negNode](double tPre1, Mat<double> mxPre1, double tPre2, Mat<double> mxPre2){
+						const double vPre1 = mxPre1(posNode,0) - mxPre1(negNode,0); //Voltage across inductor at t-timestep
+						const double vPre2 = mxPre2(posNode,0) - mxPre2(negNode,0); //Voltage across inductor at t-2·timestep
+						return 2 * vPre1 - vPre2;
+					};
+				break;}
+			case 1:{ //Capacitor
+				double cValue = args[0], posNode = args[1], negNode = args[2];
+				this->waveform = [cValue, posNode, negNode](double tPre1, Mat<double> mxPre1, double tPre2, Mat<double> mxPre2){
+					const double vPre1 = mxPre1(posNode,0) - mxPre1(negNode,0); //Voltage across inductor at t-timestep
+					const double vPre2 = mxPre2(posNode,0) - mxPre2(negNode,0); //Voltage across inductor at t-2·timestep
+					const double dVdT = (vPre1-vPre2)/(tPre1 - tPre2);
+					return cValue * dVdT;
+				};
+				break;}
+			case 2:{ //Voltage Trigger
+
+				break;}
+			case 3:{ //Current Trigger
+				
+				break;}
+			case 4:{ //Voltage Dependant
+
+				break;}
+			case 5:{ //Current Dependant
+
+			}
+		}
+	}
+};
 class Sim{ //Currently unused struct for toring the type of simulations. Potentially worth merging with SimParams. Structs DC and Tran inherit from this.
 public:
-	vector<Source> sources;
-	vector<vComponent> resistors;
-	vector<vComponent> reactComs;
-	vector<Node> nodes;
+	vector<Source> sources; //Independent voltage & current sources ie DC 5v, SINE 5v amplitude / 3v dc offset etc.
+	vector<Resistor> resistors; //Resistors ie R1 between nodes 2 & 3 with value 3.4kΩ
+	vector<DepSource> dSources; //Dependent voltage & current sources (including capacitors and inductors) ie DC 3V if(V(node 1) > 1.5V), 1V otherwise
+	vector<Node> nodes; //The wires between the components.
 	double timeStep;
 	double start;
 	double end;

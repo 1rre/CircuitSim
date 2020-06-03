@@ -41,7 +41,7 @@ Sim getComs(){
 	}
 	for(string l:lines){
 		if(regex_match(l,vComEx)){ //Resistors, capacitors and inductors
-			vComponent v;
+			Resistor v;
 			smatch m;
 			regex_search(l, m, vCom);
 			v.uName = m.str(0); //2 of 6
@@ -81,11 +81,11 @@ Sim getComs(){
 				rCnt++;
 				rtn.resistors.push_back(v);
 			}
-			else{
+/*			else{
 				v.id = cCnt; //1 of 6
 				cCnt++;
 				rtn.reactComs.push_back(v);
-			}
+			}*/
 		}
 		else if(regex_match(l,srcEx)){ //Sources
 			/*	 IMPORTANT
@@ -133,7 +133,7 @@ Sim getComs(){
             if(regex_search(_l,m,dc)){
 				_l = string(m.str(0)).substr(3);
 				vector<double> args{getVal(_l)};
-				aS.srcFunc(aS.cName == 'I', 0, args);
+				aS.srcFunc(0, args);
 			}
 			else if(regex_search(_l,m,pulse)){
 				vector<double> args;
@@ -141,7 +141,7 @@ Sim getComs(){
 					args.push_back(getVal(m.str(0)));
 					_l = m.suffix();
 				}
-				aS.srcFunc(aS.cName == 'I', 1, args);
+				aS.srcFunc(1, args);
 			}
 			else if(regex_search(_l,m,sine)){
 				vector<double> args;
@@ -149,7 +149,7 @@ Sim getComs(){
 					args.push_back(getVal(m.str(0)));
 					_l = m.suffix();
 				}
-				aS.srcFunc(aS.cName == 'I', 2, args);
+				aS.srcFunc(2, args);
 			}
 			else if(regex_search(_l,m,exp)){
 				vector<double> args;
@@ -157,7 +157,7 @@ Sim getComs(){
 					args.push_back(getVal(m.str(0)));
 					_l = m.suffix();
 				}
-				aS.srcFunc(aS.cName == 'I', 3, args);
+				aS.srcFunc(3, args);
 			}
 			else if(regex_search(_l,m,sffm)){
 				vector<double> args;
@@ -165,7 +165,7 @@ Sim getComs(){
 					args.push_back(getVal(m.str(0)));
 					_l = m.suffix();
 				}
-				aS.srcFunc(aS.cName == 'I', 4, args);
+				aS.srcFunc(4, args);
 			}
 			else if(regex_search(_l,m,pwl)){
 				//TODO: This mess
@@ -178,7 +178,7 @@ Sim getComs(){
 					args.push_back(getVal(m.str(0)));
 					_l = m.suffix();
 				}
-				aS.srcFunc(aS.cName == 'I', 6, args);
+				aS.srcFunc(6, args);
 			}
 			rtn.sources.push_back(aS);
 		}
