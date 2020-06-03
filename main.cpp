@@ -51,12 +51,14 @@ int main(){
 		my = maQ * mz;
 		mxPre2 = mxPre1;
 		solve(mxPre1,maR,my);
-		string s;
-		for(double pt : mxPre1.row(0)){
-			s += ",";
-			s += pt;
+		if(time>_.start){
+			string s;
+			for(double pt : mxPre1.row(0)){
+				s += ",";
+				s += pt;
+			}
+			s+='\n';
+			cout<<s.substr(1)<<endl;
 		}
-		s+='\n';
-		cout<<s.substr(1)<<endl;
 	}
 }

@@ -181,7 +181,7 @@ Sim getComs(){
 			}
 			else if(regex_search(_l,m,pwl)){
 				//TODO: This mess
-				cerr<<"PWLs are scary and I'm too tired for their shit, check back later"<<endl;
+				cerr<<"PWLs are scary yo, check back later"<<endl;
 				exit(5);
 			}
 			else if(regex_search(_l,m,am)){
