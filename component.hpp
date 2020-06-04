@@ -20,18 +20,14 @@ using namespace arma;
 
 class Node{ //A node. As the nodes are numbered 0 or from N001 to N999 we can give them a unique integer ID directly from the CIR file
 public:
-	int ID; //Used as the key for the right and left component maps
+	int ID = 0; //Used as the key for the right and left component maps
 	double voltage;
 	Node(int id);
-	Node();
 };
 Node::Node(int id){ //Constructor for a node where there is a nonzero voltage, ie not the reference node
 	this->ID = id;
+	this->voltage = double(0);
 }
-Node::Node(){ //Constructorfor either an empty node or the reference node
-	this->ID=0;
-}
-
 struct Component{
     char cName; //The component name ie "Resistor", "Capacitor" etc.
     string uName; //The name of the component as in the CIR file ie "R1", "Vin" etc.
