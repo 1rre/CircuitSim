@@ -20,18 +20,14 @@ using namespace arma;
 
 class Node{ //A node. As the nodes are numbered 0 or from N001 to N999 we can give them a unique integer ID directly from the CIR file
 public:
-	int ID; //Used as the key for the right and left component maps
+	int ID = 0; //Used as the key for the right and left component maps
 	double voltage;
 	Node(int id);
-	Node();
 };
 Node::Node(int id){ //Constructor for a node where there is a nonzero voltage, ie not the reference node
 	this->ID = id;
+	this->voltage = double(0);
 }
-Node::Node(){ //Constructorfor either an empty node or the reference node
-	this->ID=0;
-}
-
 struct Component{
     char cName; //The component name ie "Resistor", "Capacitor" etc.
     string uName; //The name of the component as in the CIR file ie "R1", "Vin" etc.
@@ -41,6 +37,9 @@ struct Component{
 };
 struct Resistor:Component{ //A linear component such as a resistor, capacitor, inductor or non-dependant source
 	double val; //the value of the component in SI units. In sources this is the DC offset.
+	double findCur(){
+		return((this->pos->voltage - this->neg->voltage)/this->val);
+	}
 };
 struct Source:Component{ //Only voltage sources here, I heard that current kills
 	double DCOffset;
@@ -200,8 +199,6 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 					else if(time > nCycles / (freq) + tDelay){
 						effTime = -nCycles / (freq);
 					}
-
-
 					return vOffset + vAmp * exp(theta * effTime) * sin(2 * M_PI * freq * effTime + phi);
 				};
 				break;}
@@ -443,6 +440,9 @@ public:
 	double end;
 	int steps;
 	void DC(){
+		this->start = 0;
+		this->end = 0;
+		this->timeStep = 0;
 		this->steps = 0;
 	}
 	void Tran(double start, double end, double timeStep){
