@@ -441,6 +441,9 @@ public:
 	double end;
 	int steps;
 	void DC(){
+		this->start = 0;
+		this->end = 0;
+		this->timeStep = 0;
 		this->steps = 0;
 	}
 	void Tran(double start, double end, double timeStep){
