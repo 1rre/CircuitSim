@@ -204,10 +204,10 @@ Sim getComs(){
 			}
 			switch(params.size()){
 				case 2:{ //Just stop time
-					rtn.Tran(double(0), params[1], 10000);
+					rtn.Tran(double(0), params[1], params[1]/10000);
 					break;}
 				case 3:{ //Start and stop time
-					rtn.Tran(params[2], params[1], 10000);
+					rtn.Tran(params[2], params[1], (params[1]-params[2])/10000);
 					break;}
 				case 4:{
 					rtn.Tran(params[2], params[1], params[3]);
