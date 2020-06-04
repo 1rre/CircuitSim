@@ -40,11 +40,10 @@ object resultsViewer extends JFXApp{
         scene = new Scene{
 			val in = stdin.mkString.split('\n')
 			val lines = in.map(_.split(','))
-			var graph = new LineChart(NumberAxis("X Axis"), NumberAxis("Y Axis")) {
+			var graph = new LineChart(NumberAxis("Time"), NumberAxis("Voltage")) { //TODO: Split into current & Voltage
 				title = "Circuit Details"
 				hgrow = Always
 			}
-
 			val series = lines(0).zipWithIndex.tail.foldLeft(Seq[(javafx.scene.chart.XYChart.Series[Number, Number],BooleanProperty)]())((acc,sName) => {
 				val srs = XYChart.Series.sfxXYChartSeries2jfx(new XYChart.Series[Number, Number]{
 					name = sName._1
@@ -78,7 +77,7 @@ object resultsViewer extends JFXApp{
 				hgrow = Always
 				style = "-fx-font-size:18;"
 			}
-			val jpg = new Button("Export to JPG"){
+			val jpg = new Button("Export to JPG"){ //TODO: Maybe add PDF & SVG?
 				hgrow = Always
 				alignment = CenterLeft
 				onMousePressed = (me:MouseEvent) => {
@@ -132,3 +131,4 @@ object resultsViewer extends JFXApp{
         }
     }
 }
+//TODO: Add zoom & auto scale on charts.

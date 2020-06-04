@@ -8,13 +8,9 @@ using namespace arma;
 
 int main(){
 	Sim _;
-	cerr<<"here I am"<<endl;
 	mat ma = GetA(_);
-	cerr<<"here I am"<<endl;
 	mat maQ = mat(ma.n_rows, ma.n_cols);
-	cerr<<"here I am"<<endl;
 	mat maR = mat(ma.n_rows, ma.n_cols);
-	cerr<<"here I am"<<endl;
 	qr(maQ, maR, ma);
 	maQ = maQ.t(); //TODO: Compare performance to other solving methods.
 	string header;
