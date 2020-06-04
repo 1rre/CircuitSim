@@ -545,7 +545,8 @@ Sim::Sim(){
 					this->nodes.push_back(Node(i));
 				}
 			}
-			v.pos = &(this->nodes[pnd]); //4 of 6
+			v.pos = new Node(0);
+			*v.pos = (*this).nodes[pnd];
 			int nnd = 0;
 			_l = m.suffix();
 			regex_search(_l,m,node);
@@ -608,7 +609,8 @@ Sim::Sim(){
 					this->nodes.push_back(Node(i));
 				}
 			}
-			aS.pos = &(this->nodes[pnd]);
+			aS.pos = new Node(0);
+			*aS.pos = (*this).nodes[pnd];
 			int nnd = 0;
 			_l = m.suffix();
 			regex_search(_l,m,node);
