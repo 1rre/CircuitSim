@@ -67,7 +67,7 @@ Mat<double> MatrixB(Sim s){ //Calculates Matrix B and stores the result in Matri
 	return MatrixB;// return the completed B matrix
 }
 
-Mat<double> MatrixC(Sim s)
+Mat<double> MatrixC(Sim s) // construct the
 {
 	Mat<double> C = trans(MatrixB(s));
 	return C;
@@ -81,9 +81,10 @@ Mat<double> MatrixD(Sim s)
 		if ((s.sources[i].cName=='V') || (s.sources[i].cName=='L')) {
 			M+=1;
 		}
+  }
 	Mat<double> D(M,M,fill::zeros);
 	return D;
-}
+
 }
 
 Mat<double> GetA(Sim s)
