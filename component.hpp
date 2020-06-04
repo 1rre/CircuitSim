@@ -41,6 +41,9 @@ struct Component{
 };
 struct Resistor:Component{ //A linear component such as a resistor, capacitor, inductor or non-dependant source
 	double val; //the value of the component in SI units. In sources this is the DC offset.
+	double findCur(){
+		return((this->pos->voltage - this->neg->voltage)/this->val);
+	}
 };
 struct Source:Component{ //Only voltage sources here, I heard that current kills
 	double DCOffset;
