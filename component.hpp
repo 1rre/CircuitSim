@@ -682,7 +682,6 @@ Sim::Sim(){
 				}
 				aS.srcFunc(6, args);
 			}
-			aS.neg->ID = 0;
 			this->sources.push_back(aS);
 		}
 		else if(regex_match(l,tranEx)){ //Transients be like 0 [tstop] [tstart] [timestep]
