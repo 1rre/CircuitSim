@@ -13,8 +13,8 @@ using namespace std;
 double getVal(string num);
 
 Sim getComs(){
-	int dCnt = 0;
-	int sCnt = 0;
+	int iCnt = 0;
+	int vCnt = 0;
 	int rCnt = 0;
 	//TODO: Add dSource regex.
 	const regex value("([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)");//(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)
@@ -33,7 +33,6 @@ Sim getComs(){
     const regex vComEx("((R|L|C)(([0-9]+)|([A-z]+))+ ((N[0-9][0-9][0-9])|0) ((N[0-9][0-9][0-9])|0) [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)"); //A full line in the CIR file for any resistor
     const regex srcEx("((V|I)(([0-9]+)|([A-z]+))+ ((N[0-9][0-9][0-9])|0) ((N[0-9][0-9][0-9])|0) ((DC (([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))|(SINE[ ]?[(]?( ?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])|(PULSE[ ]?[(]?( ?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])|(EXP[ ]?[(]?( ?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])|(SFFM[ ]?[(]?( ?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])|((PWL)  ((VALUE[_]SCALE[_]FACTOR[=](([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))?( )?(TIME[_]SCALE[_]FACTOR[=](([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))( )?)?(((REPEAT FOR)(( [0-9]+)|(EVER)))? [(]((([+]?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?) ([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?))*)|(file[=](.*))[)] (ENDREPEAT)?( )?)+ (TRIGGER V([(]N[0-9][0-9][0-9])[)](([>])|([=])|([<]))(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))?)|(AM[ ]?[(]?(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])))"); //A full line in the CIR file for any type of voltage or current source, either AC or DC
     Sim rtn; //This will be our sim. There are many like it but this one is ours. Our sim is our best friend. It is our life. We must master it as we master our lives. Without us, our sim is useless. Without our sim, we are useless. We must run our sim true. We must simulate faster than the programs who are trying to simulate us. We must simulate them before they simulate us. Our sim and us know what counts in simulation is not the circuits you simulate, the current sources we approximate, nor the resistors we model. We know that it is the voltages we calculate that count. Our sim is human, even as us, because it is our life. Thus, we will learn it as a brother. We will learn its weaknesses, its strengths, its functions, its objects, its variables and its bugs. We will keep our sim well commented and optimised. We will become part of each other. Before Dave Thomas, we swear this creed. Our sim and us are the simulators of SPICE circuits. We are the masters of current sources. We are the simulators of life. So it be, until the circuit has been simulated and there are no more current sources, but comma separated values.
-	rtn.nodes.push_back(Node());
 	vector<string> lines; //The vector of strings read from cin. Used so that the user can input lines without having to wait for them to parse.
     while(cin){ //While data is being inputted
 		string line=""; //Create a blank string to store the line in
@@ -84,13 +83,19 @@ Sim getComs(){
 			}
 			else{ //Inductor or Capacitor
 				DepSource dS;
-				dS.id = dCnt;
-				dCnt++;
 				dS.cName = v.cName;
 				dS.uName = v.uName;
 				dS.DCOffset = 0;
 				dS.pos = v.pos;
 				dS.neg = v.neg;
+				if(dS.cName == 'C'){
+					dS.id = iCnt;
+					iCnt++;
+				}
+				else{
+					dS.id = vCnt;
+					vCnt++;
+				}
 				vector<double> args{v.val,double(dS.pos->ID),double(dS.neg->ID)};
 				dS.srcFunc(dS.cName=='C',args);
 				rtn.dSources.push_back(dS);
@@ -116,7 +121,7 @@ Sim getComs(){
 					rtn.nodes.push_back(Node(i));
 				}
 			}
-			aS.pos = &rtn.nodes[nd];
+			aS.pos = &(rtn.nodes[nd]);
 			_l = m.suffix();
 			regex_search(_l,m,node);
 			if(m.str(0) == " 0"){
@@ -130,9 +135,11 @@ Sim getComs(){
 					rtn.nodes.push_back(Node(i));
 				}
 			}
-			aS.neg = &rtn.nodes[nd];
-            aS.id = sCnt;
-            sCnt++;
+			aS.neg = &(rtn.nodes[nd]);
+			if(aS.cName != 'c'){
+				aS.id = vCnt;
+	            vCnt++;
+			}
 			_l = string(m.suffix()).substr(1);
             if(regex_search(_l,m,dc)){
 				_l = string(m.str(0)).substr(3);
@@ -173,7 +180,7 @@ Sim getComs(){
 			}
 			else if(regex_search(_l,m,pwl)){
 				//TODO: This mess
-				cerr<<"PWLs are scary and I'm too tired for their shit, check back later"<<endl;
+				cerr<<"PWLs are scary yo, check back later"<<endl;
 				exit(5);
 			}
 			else if(regex_search(_l,m,am)){
@@ -186,7 +193,7 @@ Sim getComs(){
 			}
 			rtn.sources.push_back(aS);
 		}
-		else if(regex_match(l,tranEx)){ //Transients be like [timestep] [tstop] [tstart] []
+		else if(regex_match(l,tranEx)){ //Transients be like 0 [tstop] [tstart] [timestep]
 			vector<double> params;
 			string _l = l;
 			smatch m;
@@ -196,10 +203,10 @@ Sim getComs(){
 			}
 			switch(params.size()){
 				case 2:{ //Just stop time
-					rtn.Tran(double(0), params[1], 10000);
+					rtn.Tran(double(0), params[1], 1000);
 					break;}
 				case 3:{ //Start and stop time
-					rtn.Tran(params[2], params[1], 10000);
+					rtn.Tran(params[2], params[1], 1000);
 					break;}
 				case 4:{
 					rtn.Tran(params[2], params[1], params[3]);
