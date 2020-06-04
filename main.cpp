@@ -1,5 +1,6 @@
 #include "component.hpp"
 #include "Matrix.hpp"
+#include "ConstructA.hpp"
 
 using namespace std;
 using namespace arma;
@@ -7,9 +8,13 @@ using namespace arma;
 
 int main(){
 	Sim _;
-	mat ma;	//TODO: Get Matrix A.
-	mat maQ;
-	mat maR;
+	cerr<<"here I am"<<endl;
+	mat ma = GetA(_);
+	cerr<<"here I am"<<endl;
+	mat maQ = mat(ma.n_rows, ma.n_cols);
+	cerr<<"here I am"<<endl;
+	mat maR = mat(ma.n_rows, ma.n_cols);
+	cerr<<"here I am"<<endl;
 	qr(maQ, maR, ma);
 	maQ = maQ.t(); //TODO: Compare performance to other solving methods.
 	string header;
@@ -17,7 +22,6 @@ int main(){
 		header += ",time";
 	}
 	for(int i = 1; i<_.nodes.size(); i++){
-
 		header += (",V(N" + to_string(i) + ")");
 	}
 	for(auto iS : _.sources){
