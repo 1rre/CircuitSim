@@ -42,28 +42,30 @@ Mat<double> MatrixB(Sim s){ //Calculates Matrix B and stores the result in Matri
   }
   double N = s.nodes.size()-1; // number of nodes
   Mat<double> MatrixB(N,M,fill::zeros); // creating a matrix of the correct size initialised with zeros
+//  cout<<"N"<<N<<" "<<"M"<<M<<endl;
   for(int i = 0; i < s.sources.size(); i++){ //cycling through the sources vector
     if ((s.sources[i].cName=='V') || (s.sources[i].cName=='L')) { // choosing the voltage sources and inductors
       double pos = s.sources[i].pos->ID-1;//finding the positive node
       double neg = s.sources[i].neg->ID-1;//finding the negative node
-      cout<<s.sources[i].uName<<endl;
-      cout<<"neg: "<<neg<<endl;
-      cout<<"pos: "<<pos<<endl;
+
+  //    cout<<s.sources[i].uName<<endl;
+  //    cout<<"neg: "<<neg<<endl;
+  //    cout<<"pos: "<<pos<<endl;
       if(pos>=0 && neg>=0) //if the source isnt connected to the reference node
       {
-        MatrixB(i,pos)=1; //add the positive terminal
-        MatrixB(i,neg)=-1; //add the negative terminal
+        MatrixB(pos,i)=1; //add the positive terminal
+        MatrixB(neg,i)=-1; //add the negative terminal
       }
       if (pos== -1) //if the positive terminal connects to the reference node
       {
-        MatrixB(i,neg)=-1;
+        MatrixB(neg,i)=-1;
       }
       if (neg== -1)//if the negative termainal connects to the reference node
       {
-        MatrixB(i,pos)=1;
+        MatrixB(pos,i)=1;
       }
     }
-
+  //  cout<<MatrixB<<endl;
   }
   return MatrixB;// return the completed B matrix
 }
@@ -76,7 +78,7 @@ Mat<double> MatrixC(Sim s) // construct the
 
 Mat<double> MatrixD(Sim s)
 {
-  double M = 1;
+  double M = 0;
   for (size_t i = 0; i < s.sources.size(); i++)
   {
     if ((s.sources[i].cName=='V') || (s.sources[i].cName=='L')) {
