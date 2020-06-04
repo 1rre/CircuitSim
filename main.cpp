@@ -1,4 +1,4 @@
-#include "getComs.hpp"
+#include "component.hpp"
 #include "Matrix.hpp"
 
 using namespace std;
@@ -6,7 +6,7 @@ using namespace arma;
 
 
 int main(){
-	Sim _ = getComs();
+	Sim _;
 	mat ma;	//TODO: Get Matrix A.
 	mat maQ;
 	mat maR;
