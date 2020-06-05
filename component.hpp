@@ -71,7 +71,9 @@ struct Component{
 struct Resistor:Component{ //A linear component such as a resistor, capacitor, inductor or non-dependant source
 	double val; //the value of the component in SI units. In sources this is the DC offset.
 	double findCur(){
-		return((this->pos->voltage - this->neg->voltage)/this->val);
+		auto x = (*this).pos;
+		auto y = *(x);
+		return(((*this).pos->voltage - this->neg->voltage)/this->val);
 	}
 };
 struct Source:Component{ //Only voltage sources here, I heard that current kills
@@ -427,24 +429,32 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 	}
 };
 struct DepSource:Source{
-	function<double(double,Mat<double>,double,Mat<double>)> waveform;
+	function<double(Mat<double>,Mat<double>,double)> waveform;
 	void srcFunc(int id, vector<double> args){
 		switch(id){
 			case 0:{ //Inductor
 					double lValue = args[0], posNode = args[1], negNode = args[2];
-					this->waveform = [posNode, negNode](double tPre1, Mat<double> mxPre1, double tPre2, Mat<double> mxPre2){
-						const double vPre1 = mxPre1(posNode,0) - mxPre1(negNode,0); //Voltage across inductor at t-timestep
-						const double vPre2 = mxPre2(posNode,0) - mxPre2(negNode,0); //Voltage across inductor at t-2·timestep
+					this->waveform = [posNode, negNode](Mat<double> mxPre1, Mat<double> mxPre2, double ts){
+						const double vPre1 = mxPre1(posNode-1,0) - mxPre1(negNode-1,0); //Voltage across inductor at t-timestep
+						const double vPre2 = mxPre2(posNode-1,0) - mxPre2(negNode-1,0); //Voltage across inductor at t-2·timestep
 						return 2 * vPre1 - vPre2;
 					};
 				break;}
 			case 1:{ //Capacitor
 				double cValue = args[0], posNode = args[1], negNode = args[2];
-				this->waveform = [cValue, posNode, negNode](double tPre1, Mat<double> mxPre1, double tPre2, Mat<double> mxPre2){
-					const double vPre1 = mxPre1(posNode,0) - mxPre1(negNode,0); //Voltage across inductor at t-timestep
-					const double vPre2 = mxPre2(posNode,0) - mxPre2(negNode,0); //Voltage across inductor at t-2·timestep
-					const double dVdT = (vPre1-vPre2)/(tPre1 - tPre2);
-					return cValue * dVdT;
+				this->waveform = [cValue, posNode, negNode](Mat<double> mxPre1, Mat<double> mxPre2, double ts){
+					const double vPre1 = mxPre1(posNode - 1,0) - mxPre1(negNode - 1,0); //Voltage across inductor at t-timestep
+					const double vPre2 = mxPre2(posNode - 1,0) - mxPre2(negNode - 1,0); //Voltage across inductor at t-2·timestep
+					cerr<<"V1:"<<mxPre1(posNode - 1,0)-mxPre1(negNode - 1,0)<<endl;
+					cerr<<"V2:"<<mxPre2(posNode - 1,0) - mxPre2(negNode - 1,0)<<endl;
+					cerr<<"TS:"<<ts<<endl;
+					double dV = vPre1-vPre2;
+					cerr<<"DV:"<<dV<<endl;
+					double dVdT = dV/(ts);
+					cerr<<cValue<<","<<dVdT<<endl;
+					double rtn = cValue * dVdT;
+					cerr<<"Return:"<<rtn<<endl;
+					return rtn;
 				};
 				break;}
 			case 2:{ //Voltage Trigger
@@ -519,9 +529,26 @@ Sim::Sim(){
     const regex srcEx("((V|I)(([0-9]+)|([A-z]+))+ ((N[0-9][0-9][0-9])|0) ((N[0-9][0-9][0-9])|0) ((DC (([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))|(SINE[ ]?[(]?( ?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])|(PULSE[ ]?[(]?( ?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])|(EXP[ ]?[(]?( ?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])|(SFFM[ ]?[(]?( ?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])|((PWL)  ((VALUE[_]SCALE[_]FACTOR[=](([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))?( )?(TIME[_]SCALE[_]FACTOR[=](([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))( )?)?(((REPEAT FOR)(( [0-9]+)|(EVER)))? [(]((([+]?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?) ([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?))*)|(file[=](.*))[)] (ENDREPEAT)?( )?)+ (TRIGGER V([(]N[0-9][0-9][0-9])[)](([>])|([=])|([<]))(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))?)|(AM[ ]?[(]?(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])))"); //A full line in the CIR file for any type of voltage or current source, either AC or DC
     //Sim rtn; //This will be our sim. There are many like it but this one is ours. Our sim is our best friend. It is our life. We must master it as we master our lives. Without us, our sim is useless. Without our sim, we are useless. We must run our sim true. We must simulate faster than the programs who are trying to simulate us. We must simulate them before they simulate us. Our sim and us know what counts in simulation is not the circuits you simulate, the current sources we approximate, nor the resistors we model. We know that it is the voltages we calculate that count. Our sim is human, even as us, because it is our life. Thus, we will learn it as a brother. We will learn its weaknesses, its strengths, its functions, its objects, its variables and its bugs. We will keep our sim well commented and optimised. We will become part of each other. Before Dave Thomas, we swear this creed. Our sim and us are the simulators of SPICE circuits. We are the masters of current sources. We are the simulators of life. So it be, until the circuit has been simulated and there are no more current sources, but comma separated values.
 	vector<string> lines; //The vector of strings read from cin. Used so that the user can input lines without having to wait for them to parse.
-    while(cin){ //While data is being inputted
+	while(cin){ //While data is being inputted
 		string line=""; //Create a blank string to store the line in
 		getline(cin, line); //Add the next line to the string
+		string _l = line;
+		smatch m;
+		while(regex_search(_l,m,node)){
+			int pnd = 0;
+			if(m.str(0) == " 0"){
+				pnd = 0;
+			}
+			else{
+				pnd = stoi(m.str(0).substr(2));
+			}
+			if(pnd >= this->nodes.size()){
+				for(int i = this->nodes.size(); i<=pnd;i++){
+					this->nodes.push_back(Node(i));
+				}
+			}
+			_l = m.suffix();
+		}
 		lines.push_back(line); //Add the line to the vector of lines.
 	}
 	for(string l:lines){
@@ -540,29 +567,19 @@ Sim::Sim(){
 			else{
 				pnd = stoi(m.str(0).substr(2));
 			}
-			if(pnd >= this->nodes.size()){
-				for(int i = this->nodes.size(); i<=pnd;i++){
-					this->nodes.push_back(Node(i));
-				}
-			}
 			v.pos = new Node(0);
-			*v.pos = (*this).nodes[pnd];
-			int nnd = 0;
+			v.pos = &this->nodes[pnd];
 			_l = m.suffix();
 			regex_search(_l,m,node);
+			int nnd = 0;
 			if(m.str(0) == " 0"){
 				nnd = 0;
 			}
 			else{
 				nnd = stoi(m.str(0).substr(2));
 			}
-			if(nnd >= this->nodes.size()){
-				for(int i = this->nodes.size(); i<=nnd;i++){
-					this->nodes.push_back(Node(i));
-				}
-			}
 			v.neg = new Node(0);
-			*v.neg = (*this).nodes[nnd]; //5 of 6
+			v.neg = &this->nodes[nnd]; //5 of 6
 			v.val = getVal(string(m.suffix()).substr(1));
 			if(v.cName == 'R'){ //Resistor
 				v.id = rCnt; //1 of 6
@@ -574,6 +591,8 @@ Sim::Sim(){
 				dS.cName = v.cName;
 				dS.uName = v.uName;
 				dS.DCOffset = 0;
+				dS.pos = new Node(0);
+				dS.neg = new Node(0);
 				dS.pos = v.pos;
 				dS.neg = v.neg;
 				if(dS.cName == 'C'){
@@ -604,11 +623,6 @@ Sim::Sim(){
 			else{
 				pnd = stoi(m.str(0).substr(2));
 			}
-			if(pnd >= this->nodes.size()){
-				for(int i = this->nodes.size(); i<=pnd;i++){
-					this->nodes.push_back(Node(i));
-				}
-			}
 			aS.pos = new Node(0);
 			*aS.pos = (*this).nodes[pnd];
 			int nnd = 0;
@@ -619,11 +633,6 @@ Sim::Sim(){
 			}
 			else{
 				nnd = stoi(m.str(0).substr(2));
-			}
-			if(nnd >= this->nodes.size()){
-				for(int i = this->nodes.size(); i<=nnd;i++){
-					this->nodes.push_back(Node(i));
-				}
 			}
 			aS.neg = new Node(0);
 			*aS.neg = (*this).nodes[nnd]; //5 of 6
