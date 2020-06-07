@@ -9,3 +9,5 @@ lazy val javaFXModules = Seq("base", "controls", "fxml", "graphics", "media", "s
 libraryDependencies ++= javaFXModules.map( m =>
   "org.openjfx" % s"javafx-$m" % "14.0.1" classifier osName
 )
+excludeFilter in unmanagedSources := "CircuitLoop.scala"
+excludeFilter in unmanagedSources := "circuit.scala"
