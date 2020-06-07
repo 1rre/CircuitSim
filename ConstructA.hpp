@@ -36,15 +36,14 @@ Mat<double> MatrixG(Sim s) // this function will return the G matrix, which show
 Mat<double> MatrixB(Sim s){ //Calculates Matrix B and stores the result in MatrixB
   double M = 0; //number of voltage sources
   for (size_t i = 0; i < s.sources.size(); i++) { // finds the number of voltage sources and inductors in the netlist
-    if ((s.sources[i].cName=='V')) {
+    if (s.sources[i].cName=='V') {
       M+=1;
 
     }
   }
   for (size_t i = 0; i < s.dSources.size(); i++) {
-    if ((s.dSources[i].cName=='L')) {
+    if (s.dSources[i].cName=='L') {
       M+=1;
-
     }
   }
 
@@ -54,7 +53,7 @@ Mat<double> MatrixB(Sim s){ //Calculates Matrix B and stores the result in Matri
 //  cout<<MatrixB<<endl;
 //  cout<<"N"<<N<<" "<<"M"<<M<<endl;
   for(int i = 0; i < s.sources.size(); i++){ //cycling through the sources vector
-    if ((s.sources[i].cName=='V')) { // choosing the voltage sources and inductors
+    if (s.sources[i].cName=='V') { // choosing the voltage sources and inductors
       double pos = s.sources[i].pos->ID-1;//finding the positive node
       double neg = s.sources[i].neg->ID-1;//finding the negative node
 
@@ -81,7 +80,7 @@ Mat<double> MatrixB(Sim s){ //Calculates Matrix B and stores the result in Matri
 //  cout<<MatrixB<<endl;
 
   for(int i = 0; i < s.dSources.size(); i++){ //cycling through the sources vector
-    if ((s.dSources[i].cName=='L')) { // choosing the voltage sources and inductors
+    if (s.dSources[i].cName=='L') { // choosing the voltage sources and inductors
       double pos = s.dSources[i].pos->ID-1;//finding the positive node
       double neg = s.dSources[i].neg->ID-1;//finding the negative node
 
@@ -120,12 +119,12 @@ Mat<double> MatrixD(Sim s)
 {
   double M = 0;
   for (size_t i = 0; i < s.sources.size(); i++) {
-    if ((s.sources[i].cName=='V')) {
+    if (s.sources[i].cName=='V') {
       M+=1;
     }
   }
   for (size_t i = 0; i < s.dSources.size(); i++) {
-    if ((s.dSources[i].cName=='L')) {
+    if (s.dSources[i].cName=='L') {
       M+=1;
     }
   }
@@ -139,12 +138,12 @@ Mat<double> GetA(Sim s)
   double N = s.nodes.size()-1;
   double M = 0;
   for (size_t i = 0; i < s.sources.size(); i++) {
-    if ((s.sources[i].cName=='V')) {
+    if (s.sources[i].cName=='V') {
       M+=1;
     }
   }
   for (size_t i = 0; i < s.dSources.size(); i++) {
-    if ((s.dSources[i].cName=='L')) {
+    if (s.dSources[i].cName=='L') {
       M+=1;
     }
   }

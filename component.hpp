@@ -445,15 +445,9 @@ struct DepSource:Source{
 				this->waveform = [cValue, posNode, negNode](Mat<double> mxPre1, Mat<double> mxPre2, double ts){
 					const double vPre1 = mxPre1(posNode - 1,0) - mxPre1(negNode - 1,0); //Voltage across inductor at t-timestep
 					const double vPre2 = mxPre2(posNode - 1,0) - mxPre2(negNode - 1,0); //Voltage across inductor at t-2·timestep
-					cerr<<"V1:"<<mxPre1(posNode - 1,0)-mxPre1(negNode - 1,0)<<endl;
-					cerr<<"V2:"<<mxPre2(posNode - 1,0) - mxPre2(negNode - 1,0)<<endl;
-					cerr<<"TS:"<<ts<<endl;
 					double dV = vPre1-vPre2;
-					cerr<<"DV:"<<dV<<endl;
 					double dVdT = dV/(ts);
-					cerr<<cValue<<","<<dVdT<<endl;
 					double rtn = cValue * dVdT;
-					cerr<<"Return:"<<rtn<<endl;
 					return rtn;
 				};
 				break;}
