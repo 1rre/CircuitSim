@@ -46,7 +46,7 @@ object plotUtils{
 }
 
 
-object resultsViewer{ //extends JFXApp
+object resultsViewer extends JFXApp{
 	import plotUtils._
 	import CirClasses._
 	val sim = getComs
