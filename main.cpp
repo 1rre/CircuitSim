@@ -36,7 +36,7 @@ int main(){
 	cout<<header.substr(1)<<endl; //Print the header minus the leading comma to std out
 	mat mxPre1 = mat(ma.n_rows,0).fill(0);
 	mat mxPre2 = mat(ma.n_rows,0).fill(0);
-	mat mz = getZ(mxPre1, mxPre2, _, 0); //Get matrix Z at time 0
+	mat mz = getZ(mxPre1, mxPre2, _, -1); //Get matrix Z at time -1
 	mat my = maQ * mz; //Set a matrix y to the Q part of A's decomposition * the z matrix we just got
 	solve(mxPre1,maR,my); //Solve matrix x = R part of A * y matrix
 	mxPre2 = mxPre1; //Set mxPre1 and mxPre2 to be equal. Pre1 and Pre2 stand for 1 timestep previous and 2 timesteps previous.
