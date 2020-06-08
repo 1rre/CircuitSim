@@ -7,7 +7,6 @@ import scala.io.Source._
 import scala.math._
 
 object resultsViewer extends App{
-	import plotUtils._
 	import CirClasses._
 	val sim = getComs
 	var output:String = ""

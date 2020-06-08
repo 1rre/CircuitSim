@@ -1,3 +1,6 @@
+//This file defines the parameters for the SBT compiler
+
+scalaVersion := "2.13.2"
 libraryDependencies += ("org.scalafx" %% "scalafx" % "14-R19")
 lazy val osName = System.getProperty("os.name") match {
   case n if n.startsWith("Linux")   => "linux"

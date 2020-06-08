@@ -428,7 +428,7 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 		}
 	}
 };
-struct DepSource:Source{
+struct DepSource:Source{ //TODO: Implement other dependent sources
 	function<double(Mat<double>,Mat<double>,double)> waveform;
 	void srcFunc(int id, vector<double> args){
 		switch(id){
@@ -477,19 +477,19 @@ public:
 	double start;
 	double end;
 	int steps;
-	void DC(){
+	void DC(){ //Constructor for a operating point simulation
 		this->start = 0;
 		this->end = 0;
 		this->timeStep = 0;
 		this->steps = 0;
 	}
-	void Tran(double start, double end, double timeStep){
+	void Tran(double start, double end, double timeStep){ //Constructor for a transient simulation given a timestep
 	    this->start = start;
 	    this->end = end;
 	    this->timeStep = timeStep;
 	    this->steps = ((start-end)/timeStep);
 	}
-	void Tran(double start, double end, int steps){
+	void Tran(double start, double end, int steps){ //Constructor for a transient simulation given the number of steps
 	    this->start = start;
 		this->end = end;
 		this->steps = steps;
@@ -498,17 +498,18 @@ public:
 	Sim();
 };
 Sim::Sim(){
-	this->sources = vector<Source>{};
+	this->sources = vector<Source>{}; //Empty vectors to be filled - initialised here due to issues with data getting lost
 	this->dSources = vector<DepSource>{};
 	this->resistors = vector<Resistor>{};
 	this->nodes = vector<Node>{Node(0)};
-	int iCnt = 0;
-	int vCnt = 0;
-	int rCnt = 0;
+	int iCnt = 0; //The number of current sources. Used for IDs
+	int vCnt = 0; //Same but voltage sources
+	int rCnt = 0; //Same but resistors
 	//TODO: Add dSource regex.
-	const regex value("([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)");//(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)
+	//Regular expression contents
+	const regex value("([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)"); //A value ie 3.2k, 55000, 0.1μ etc
     const regex comment("([*].*)"); //* followed by anything, ie a comment (haha meta)
-    const regex tranEx("([.]tran 0 [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s?( [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s?)*( [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s?)*)"); //A transient simulation command. Interestingly this has units unlike the others.
+    const regex tranEx("([.]tran 0 [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s?( [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s?)*( [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?s?)*)"); //A transient simulation command. Interestingly this has units (seconds) unlike the others.
     const regex dc("(DC (([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))"); //A DC source
     const regex sine("(SINE[ ]?[(]?( ?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])"); //An AC source with SINE input
 	const regex pulse("(PULSE[ ]?[(]?( ?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])");
@@ -521,24 +522,23 @@ Sim::Sim(){
     const regex src("(V|I)(([0-9]+)|([A-z]+))+"); //A named voltage source
     const regex vComEx("((R|L|C)(([0-9]+)|([A-z]+))+ ((N[0-9][0-9][0-9])|0) ((N[0-9][0-9][0-9])|0) [0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)"); //A full line in the CIR file for any resistor
     const regex srcEx("((V|I)(([0-9]+)|([A-z]+))+ ((N[0-9][0-9][0-9])|0) ((N[0-9][0-9][0-9])|0) ((DC (([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))|(SINE[ ]?[(]?( ?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])|(PULSE[ ]?[(]?( ?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])|(EXP[ ]?[(]?( ?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])|(SFFM[ ]?[(]?( ?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])|((PWL)  ((VALUE[_]SCALE[_]FACTOR[=](([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))?( )?(TIME[_]SCALE[_]FACTOR[=](([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))( )?)?(((REPEAT FOR)(( [0-9]+)|(EVER)))? [(]((([+]?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?) ([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?))*)|(file[=](.*))[)] (ENDREPEAT)?( )?)+ (TRIGGER V([(]N[0-9][0-9][0-9])[)](([>])|([=])|([<]))(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))?)|(AM[ ]?[(]?(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(([0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])))"); //A full line in the CIR file for any type of voltage or current source, either AC or DC
-    //Sim rtn; //This will be our sim. There are many like it but this one is ours. Our sim is our best friend. It is our life. We must master it as we master our lives. Without us, our sim is useless. Without our sim, we are useless. We must run our sim true. We must simulate faster than the programs who are trying to simulate us. We must simulate them before they simulate us. Our sim and us know what counts in simulation is not the circuits you simulate, the current sources we approximate, nor the resistors we model. We know that it is the voltages we calculate that count. Our sim is human, even as us, because it is our life. Thus, we will learn it as a brother. We will learn its weaknesses, its strengths, its functions, its objects, its variables and its bugs. We will keep our sim well commented and optimised. We will become part of each other. Before Dave Thomas, we swear this creed. Our sim and us are the simulators of SPICE circuits. We are the masters of current sources. We are the simulators of life. So it be, until the circuit has been simulated and there are no more current sources, but comma separated values.
 	vector<string> lines; //The vector of strings read from cin. Used so that the user can input lines without having to wait for them to parse.
 	while(cin){ //While data is being inputted
 		string line=""; //Create a blank string to store the line in
 		getline(cin, line); //Add the next line to the string
 		string _l = line;
-		smatch m;
-		while(regex_search(_l,m,node)){
-			int pnd = 0;
+		smatch m; //A "string match" object for the matches to regex search to be put in
+		while(regex_search(_l,m,node)){ //Search the inputted line for nodes
+			int pnd = 0; //Int for the node's id
 			if(m.str(0) == " 0"){
 				pnd = 0;
 			}
 			else{
-				pnd = stoi(m.str(0).substr(2));
+				pnd = stoi(m.str(0).substr(2)); //Set the int to the node's id
 			}
-			if(pnd >= this->nodes.size()){
+			if(pnd >= this->nodes.size()){ //If the node isn't already in the list
 				for(int i = this->nodes.size(); i<=pnd;i++){
-					this->nodes.push_back(Node(i));
+					this->nodes.push_back(Node(i)); //Add all the nodes with ids lower or equal to the inputted one (so that they're in the right order).
 				}
 			}
 			_l = m.suffix();
