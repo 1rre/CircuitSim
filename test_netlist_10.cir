@@ -1,0 +1,7 @@
+*Netlist
+V1 N001 0 AM(3 10k 1k 500m)
+R1 N002 N001 5k
+R3 N003 0 16k
+R1 N002 N003 9.4k
+.tran 0 10m
+.end

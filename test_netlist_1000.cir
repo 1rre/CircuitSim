@@ -1,0 +1,8 @@
+*Netlist
+V1 N001 0 SFFM(0.0 1.6 4k 1.5 1.50k)
+R1 N002 N001 5k
+R3 N003 0 16k
+R2 N002 N003 3.2k
+R2 N003 N002 0.032Meg
+.tran 0 10m
+.end

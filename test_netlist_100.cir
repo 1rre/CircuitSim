@@ -1,0 +1,7 @@
+*Netlist
+V1 N001 0 SINE(3 4 1k)
+R1 N002 N001 5k
+R3 N003 0 16k
+C1 N002 N003 50p
+.tran 0 10m
+.end
