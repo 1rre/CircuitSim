@@ -26,7 +26,7 @@ int main(){
 		}
 	}
 	for(auto dS : _.dSources){
-		if(dS.cName != 'I' && dS.cName != 'C'){
+		if(dS.cName != 'I' && dS.cName != 'L'){
 			header += (",I(" + dS.uName + ")"); //Add a current header for each dependent source (currently just inductors and capcitors)
 		}
 	}
@@ -61,7 +61,7 @@ int main(){
 			}
 		}
 		for(auto dS : _.dSources){
-			if(dS.cName == 'C'){
+			if(dS.cName == 'L'){
 				s += ("," + to_string(dS.waveform(mxPre1,mxPre2,0))); //add the current of each capacitor to the string
 			}
 		}
@@ -93,7 +93,7 @@ int main(){
 				}
 			}
 			for(auto dS : _.dSources){
-				if(dS.cName == 'C'){
+				if(dS.cName == 'L'){
 					s += ("," + to_string(dS.waveform(mxPre1,mxPre2,time))); //add the current of each capacitor to the string
 				}
 			}

@@ -62,7 +62,7 @@ mat getZ(mat mxPre1, mat mxPre2, Sim _, double time){
 		else{ //From here this loop is written the same as the independent sources one.
 			val = dS.DCOffset;
 		}
-		if(dS.cName == 'I' || dS.cName == 'C'){
+		if(dS.cName == 'I' || dS.cName == 'L'){
 			rtn(dS.pos->ID - 1,0) += val;
 			rtn(dS.neg->ID - 1,0) -= val;
 		}

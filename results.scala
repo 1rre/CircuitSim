@@ -66,9 +66,21 @@ object resultsViewer extends JFXApp{
 			val xAxis  = NumberAxis("Time") //Create an x axis called "time"
 			xAxis.forceZeroInRange() = false //Don't force the axis to have 0 in its rage
 			xAxis.tickLabelFormatter() = sci //Format the axis tick points in the scientific way as described earlier
+			xAxis.upperBound.onChange{
+				xAxis.tickUnit() = (xAxis.upperBound() - xAxis.lowerBound()) / 15d
+			}
+			xAxis.lowerBound.onChange{
+				xAxis.tickUnit() = (xAxis.upperBound() - xAxis.lowerBound()) / 15d
+			}
 			val yAxis = NumberAxis("Voltage | Current") //Create a y axis called "Voltage | Current"
 			yAxis.forceZeroInRange() = false //Don't force the axis to have 0 in its rage
 			yAxis.tickLabelFormatter() = sci //Format the axis tick points in the scientific way as described earlier
+			yAxis.upperBound.onChange{
+				yAxis.tickUnit() =(yAxis.upperBound() - yAxis.lowerBound()) / 10d
+			}
+			yAxis.lowerBound.onChange{
+				yAxis.tickUnit() =(yAxis.upperBound() - yAxis.lowerBound()) / 10d
+			}
 
 			//CREATE THE CHECKBOXES
 			val xAxisAR = new CheckBox("Autorange Time Axis"){ //Create a checkbox with a label saying "Autorange Time Axis"
