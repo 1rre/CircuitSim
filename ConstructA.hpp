@@ -42,9 +42,9 @@ Mat<double> MatrixB(Sim s){ //Calculates Matrix B and stores the result in Matri
     }
   }
   for (size_t i = 0; i < s.dSources.size(); i++) {
-    if (s.dSources[i].cName=='C') {
+    //if (s.dSources[i].cName=='C') {
       M+=1;
-    }
+    //}
   }
 
   double N = s.nodes.size()-1; // number of nodes
@@ -80,7 +80,7 @@ Mat<double> MatrixB(Sim s){ //Calculates Matrix B and stores the result in Matri
 //  cout<<MatrixB<<endl;
 
   for(int i = 0; i < s.dSources.size(); i++){ //cycling through the sources vector
-    if (s.dSources[i].cName=='C') { // choosing the voltage sources and inductors
+   // if (s.dSources[i].cName=='C') { // choosing the voltage sources and inductors
       double pos = s.dSources[i].pos->ID-1;//finding the positive node
       double neg = s.dSources[i].neg->ID-1;//finding the negative node
 
@@ -105,7 +105,7 @@ Mat<double> MatrixB(Sim s){ //Calculates Matrix B and stores the result in Matri
       cnt+=1;
     }
   //  cout<<MatrixB<<endl;
-  }
+ // }
   return MatrixB;// return the completed B matrix
 }
 
@@ -124,9 +124,9 @@ Mat<double> MatrixD(Sim s)
     }
   }
   for (size_t i = 0; i < s.dSources.size(); i++) {
-    if (s.dSources[i].cName=='C') {
+  //  if (s.dSources[i].cName=='C') {
       M+=1;
-    }
+    //}
   }
   Mat<double> D(M,M,fill::zeros);
   return D;
@@ -143,9 +143,9 @@ Mat<double> GetA(Sim s)
     }
   }
   for (size_t i = 0; i < s.dSources.size(); i++) {
-    if (s.dSources[i].cName=='C') {
+  //  if (s.dSources[i].cName=='C') {
       M+=1;
-    }
+    //}
   }
   Mat<double> A((N+M),(N+M),fill::zeros);
   //cout<<A<<endl;

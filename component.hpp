@@ -435,20 +435,44 @@ struct DepSource:Source{ //TODO: Implement other dependent sources
 			case 0:{ //Inductor
 					double lValue = args[0], posNode = args[1], negNode = args[2];
 					this->waveform = [lValue, posNode, negNode](Mat<double> mxPre1, Mat<double> mxPre2, double ts){
-						const double vPre1 = mxPre1(posNode-1,0) - mxPre1(negNode-1,0); //Voltage across inductor at t-timestep 
-						const double vPre2 = mxPre2(posNode-1,0) - mxPre2(negNode-1,0); //Voltage across inductor at t-2·timestep
-						if((vPre1 - vPre2) != 0){
-							return (vPre1 - vPre2) * lValue / ts;
-						}
-						return lValue / ts;
+						double vPre1;
+					double vPre2;
+					if(posNode == 0 ){
+						vPre1 = 0 - mxPre1(negNode - 1,0);
+						vPre2 = 0 - mxPre2(negNode - 1,0);
+					}
+					else if(negNode == 0){
+						vPre1 = mxPre1(posNode - 1,0) - 0;
+						vPre2 = mxPre2(posNode - 1,0) - 0;
+					}
+					else{
+						vPre1= mxPre1(posNode - 1,0) - mxPre1(negNode - 1,0); //Voltage across inductor at t-timestep
+						vPre2 = mxPre2(posNode - 1,0) - mxPre2(negNode - 1,0); //Voltage across inductor at t-2·timestep
+					}
+					if((vPre1 - vPre2) != 0){
+						return (vPre1 - vPre2) * lValue / ts;
+					}
+					return lValue / ts;
 					};
 				break;}
 			case 1:{ //Capacitor
 				double cValue = args[0], posNode = args[1], negNode = args[2];
 				this->waveform = [cValue, posNode, negNode](Mat<double> mxPre1, Mat<double> mxPre2, double ts){
-					const double vPre1 = mxPre1(posNode - 1,0) - mxPre1(negNode - 1,0); //Voltage across inductor at t-timestep
-					const double vPre2 = mxPre2(posNode - 1,0) - mxPre2(negNode - 1,0); //Voltage across inductor at t-2·timestep
-					return (2 * vPre1 - vPre2);
+					double vPre1;
+					double vPre2;
+					if(posNode == 0 ){
+						vPre1 = 0 - mxPre1(negNode - 1,0);
+						vPre2 = 0 - mxPre2(negNode - 1,0);
+					}
+					else if(negNode == 0){
+						vPre1 = mxPre1(posNode - 1,0) - 0;
+						vPre2 = mxPre2(posNode - 1,0) - 0;
+					}
+					else{
+						vPre1= mxPre1(posNode - 1,0) - mxPre1(negNode - 1,0); // - mxPre1(negNode - 1,0); //Voltage across inductor at t-timestep
+						vPre2 = mxPre2(posNode - 1,0) - mxPre2(negNode - 1,0); // - mxPre2(negNode - 1,0); //Voltage across inductor at t-2·timestep
+					}
+					return ((vPre1 - vPre2) * cValue / ts) - (mxPre1(posNode - 1,0) + mxPre1(negNode - 1,0));	
 				};
 				break;}
 			case 2:{ //Voltage Trigger
@@ -589,14 +613,14 @@ Sim::Sim(){
 				dS.neg = new Node(0);
 				dS.pos = v.pos;
 				dS.neg = v.neg;
-				if(dS.cName == 'L'){
+				/*if(dS.cName == 'L'){
 					dS.id = iCnt;
 					iCnt++;
 				}
-				else{
-					dS.id = vCnt;
-					vCnt++;
-				}
+				else{*/
+				dS.id = vCnt;
+				vCnt++;
+				//}
 				vector<double> args{v.val,double(dS.pos->ID),double(dS.neg->ID)};
 				dS.srcFunc(dS.cName=='C',args);
 				this->dSources.push_back(dS);
