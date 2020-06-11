@@ -26,7 +26,7 @@ int main(){
 		}
 	}
 	for(auto dS : _.dSources){
-		if(dS.cName != 'I' && dS.cName != 'L'){
+		if(dS.cName != 'I'){
 			header += (",I(" + dS.uName + ")"); //Add a current header for each dependent source (currently just inductors and capcitors)
 		}
 	}
@@ -70,6 +70,8 @@ int main(){
 	for(double time = _.start; time<_.end; time+=_.timeStep){ //for each timestep from the start to the end
 		mz = getZ(mxPre1, mxPre2, _, time); //get the Z matrix at the current time
 		my = maQ * mz; //multiply it by the Q part of A to get my
+		//cerr<<"mxpre1\n"<<mxPre1<<endl;
+		//cerr<<"mxpre2\n"<<mxPre2<<endl;
 		mxPre2 = mxPre1; //update mxPre2
 		solve(mxPre1,maR,my); //Solve mxPre1 = the R part of A * my
 		_.nodes[0].voltage = 0; //set the ground node's voltage to 0. This shouldn't be necessary but it didn't work without it.
