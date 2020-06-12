@@ -4,11 +4,11 @@
 
 * Source code is located in [src](../src)
 * Executables are located in [run](../run)
-* Some simple reference netlists can be found in [Sample Netlists](../Sample%20Netlists)
+* Some simple reference netlists can be found in [Sample Netlists](/Sample%20Netlists)
 
 ## Running
 
-To run the program, run `./CircuitSim.sh [CIR FILE]`, or to use the [default netlist](../Sample%20Netlists/test_netlist_10.cir) run `./CircuitSim.sh`
+To run the program, run `./CircuitSim.sh [CIR FILE]`, or to use the [default netlist](Sample%20Netlists/test_netlist_10.cir) run `./CircuitSim.sh`
 
 ## Prerequisites
 
