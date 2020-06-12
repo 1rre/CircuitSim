@@ -6,7 +6,7 @@ import scalafx.scene._
 import scalafx.collections._
 import scalafx.scene.shape.Circle
 import scalafx.scene.chart._
-import scalafx.scene.text.{Text,Font}
+import scalafx.scene.text.{Text,Font,TextAlignment}
 import scalafx.scene.input.{MouseEvent,ScrollEvent,MouseDragEvent}
 import scalafx.scene.layout._
 import scalafx.scene.layout.Priority.{Always,Sometimes}
@@ -327,39 +327,41 @@ object resultsViewer extends JFXApp{
 				hgrow = Always
 				style = "-fx-font-size:18;" //Set the font size to 18px
 			}
-			val outCsv = new Button("Export to CSV"){
+			val outCsv = new Button("Export to\nCSV"){
 				hgrow = Always
+				textAlignment = TextAlignment.Center
 				alignment = Center
 				onMouseClicked = (me:MouseEvent) => {
 					val fc = new FileChooser{
 						title = "Save Dataset as CSV"
-						extensionFilters :+ new FileChooser.ExtensionFilter("CSV Files", "*.csv")
+						extensionFilters += new FileChooser.ExtensionFilter("CSV Files", "*.csv")
 					}
-					val file = fc.showSaveDialog.toString
+					val file = fc.showSaveDialog(stage).toString
 					import java.io.FileWriter
 					val writer = {
 						if(file.takeRight(4) != ".csv" && file != "") new FileWriter(file + ".csv")
 						else if(file != "") new FileWriter(file)
 						else{
-							import util.Properties.userDir
+							import util.Properties.{userDir, osName}
 							val separator = if (osName.take(3) == "Win") '\\' else '/'
 							new FileWriter(userDir + separator + "out.csv")
 						}
 					}
-					writer.write(in.mkString('\n'))
+					writer.write(in.mkString("\n"))
 					writer.close
 				}
 			}
-			val jpg = new Button("Export to JPG"){ //Make a button that allows the user to export the graph to a JPG file
+			val jpg = new Button("Export to\nJPG"){ //Make a button that allows the user to export the graph to a JPG file
 				hgrow = Always
-				alignment = CenterLeft //Align it at the centre left of its parent
+				textAlignment = TextAlignment.Center
+				alignment = Center //Align it at the centre left of its parent
 				onMouseClicked = (me:MouseEvent) => { //When the mouse is clicked (ie pressed and released quickly)
 					val fc = new FileChooser{ //Make a new file selection dialogue object
 						title = "Save as JPG" //Set the title of the dialogue
-						extensionFilters :+ new FileChooser.ExtensionFilter("JPG Files", "*.jpg") //Only show jpg files in the dialogue
+						extensionFilters += new FileChooser.ExtensionFilter("JPG Files", "*.jpg") //Only show jpg files in the dialogue
 					}
 					var file = fc.showSaveDialog(stage) //Show the file selection dialogue and save the selection to a file. Note that file is a variable as we will need to change it if ".jpg" has not been added to the end of the file name.
-					if(file!=null){ //If the
+					if(file!=null){ //If the file isn't empty
 						val ss = graph.snapshot(new SnapshotParameters, null) //Record the current state of the graph object
 						val oImg = fromFXImage(ss,null) //Convert that state to an image
 						if(file.toString.takeRight(4) != ".jpg"){ //if the file selected doesn't end with ".jpg"
@@ -369,13 +371,14 @@ object resultsViewer extends JFXApp{
 					}
 				}
 			}
-			val png = new Button("Export to PNG"){ //Same as above but for a PNG
+			val png = new Button("Export to\nPNG"){ //Same as above but for a PNG
 				hgrow = Always
-				alignment = CenterRight
+				alignment = Center
+				textAlignment = TextAlignment.Center
 				onMousePressed = (me:MouseEvent) => {
 					val fc = new FileChooser{
 						title = "Save as PNG"
-						extensionFilters ++= Seq(new FileChooser.ExtensionFilter("PNG Files", "*.PNG"))
+						extensionFilters += new FileChooser.ExtensionFilter("PNG Files", "*.PNG")
 					}
 					var file = fc.showSaveDialog(stage)
 					if(file!=null){
@@ -402,11 +405,12 @@ object resultsViewer extends JFXApp{
 			val vb = new VBox(gp,hb,txt,lv) //Create a new vbox (vertical box) node with the gridpane (with the checkboxes), hbox (with the buttons), "selected waveforms" text and the listview as children
 			vb.width.onChange{ //When the width of the vbox changes
 				hb.minWidth() = vb.width() //Set the hbox to fill the vbox horizontally (setting grow to always didn't always work)
+				hb.maxWidth() = vb.width()
 				txt.minWidth(vb.width()) //Set the text to fill the vbox horizontally
-				png.prefWidth() = vb.width() / 3.375d //Scale the buttons nicely
-				jpg.prefWidth() = vb.width() / 3.375d
-				outCsv.prefWidth = vb.width() / 3.375d
-				hb.spacing() = vb.width()/10d //Set the spacing between the buttons
+				png.prefWidth() = vb.width() / 3.1d //Scale the buttons nicely
+				jpg.prefWidth() = vb.width() / 3.1d
+				outCsv.prefWidth = vb.width() / 3.1d
+				hb.spacing() = vb.width()/60d //Set the spacing between the buttons
 				hb.padding() = Insets(vb.width()/180d,0d,vb.width()/180d,0d) //Set padding so that the buttons aren't right at the edge of the screen
 			}
 			val sp = new StackPane{ //Make a new stackpane node for the graph and cursor location text to sit on

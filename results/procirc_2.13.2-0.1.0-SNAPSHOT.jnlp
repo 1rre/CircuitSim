@@ -8,7 +8,7 @@
   </information>
   <resources>
     <j2se version="" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="procirc_2.13.2-0.1.0-SNAPSHOT.jar" size="43665" download="eager" />
+    <jar href="procirc_2.13.2-0.1.0-SNAPSHOT.jar" size="47256" download="eager" />
     <jar href="lib/javafx-base-14.0.1-linux.jar" size="751228" download="eager" />
     <jar href="lib/javafx-base-14.0.1.jar" size="302" download="eager" />
     <jar href="lib/javafx-controls-14.0.1-linux.jar" size="2530560" download="eager" />
