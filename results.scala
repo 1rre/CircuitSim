@@ -14,7 +14,7 @@ import scalafx.scene.chart.XYChart.{Series,Data}
 import scalafx.scene.control.{Label,Tooltip,ListView,CheckBox,Button}
 import scalafx.scene.control.cell.CheckBoxListCell
 import scalafx.stage.{Stage,FileChooser,Window}
-import scalafx.geometry.Pos.{CenterLeft,CenterRight,BottomLeft}
+import scalafx.geometry.Pos.{CenterLeft,CenterRight,Center,BottomLeft}
 import scalafx.geometry.Insets
 import scalafx.util.{Duration,StringConverter}
 import scala.io.Source._
@@ -327,19 +327,42 @@ object resultsViewer extends JFXApp{
 				hgrow = Always
 				style = "-fx-font-size:18;" //Set the font size to 18px
 			}
+			val outCsv = new Button("Export to CSV"){
+				hgrow = Always
+				alignment = Center
+				onMouseClicked = (me:MouseEvent) => {
+					val fc = new FileChooser{
+						title = "Save Dataset as CSV"
+						extensionFilters :+ new FileChooser.ExtensionFilter("CSV Files", "*.csv")
+					}
+					val file = fc.showSaveDialog.toString
+					import java.io.FileWriter
+					val writer = {
+						if(file.takeRight(4) != ".csv" && file != "") new FileWriter(file + ".csv")
+						else if(file != "") new FileWriter(file)
+						else{
+							import util.Properties.userDir
+							val separator = if (osName.take(3) == "Win") '\\' else '/'
+							new FileWriter(userDir + separator + "out.csv")
+						}
+					}
+					writer.write(in.mkString('\n'))
+					writer.close
+				}
+			}
 			val jpg = new Button("Export to JPG"){ //Make a button that allows the user to export the graph to a JPG file
 				hgrow = Always
 				alignment = CenterLeft //Align it at the centre left of its parent
 				onMouseClicked = (me:MouseEvent) => { //When the mouse is clicked (ie pressed and released quickly)
 					val fc = new FileChooser{ //Make a new file selection dialogue object
 						title = "Save as JPG" //Set the title of the dialogue
-						extensionFilters ++= Seq(new FileChooser.ExtensionFilter("JPG Files", "*.jpg")) //Only show jpg files in the dialogue
+						extensionFilters :+ new FileChooser.ExtensionFilter("JPG Files", "*.jpg") //Only show jpg files in the dialogue
 					}
 					var file = fc.showSaveDialog(stage) //Show the file selection dialogue and save the selection to a file. Note that file is a variable as we will need to change it if ".jpg" has not been added to the end of the file name.
 					if(file!=null){ //If the
 						val ss = graph.snapshot(new SnapshotParameters, null) //Record the current state of the graph object
 						val oImg = fromFXImage(ss,null) //Convert that state to an image
-						if(file.toString.dropRight(4) != ".jpg"){ //if the file selected doesn't end with ".jpg"
+						if(file.toString.takeRight(4) != ".jpg"){ //if the file selected doesn't end with ".jpg"
 							file = new java.io.File(file.toString + ".jpg") //Make a new file location with ".jpg" added
 						}
 						javax.imageio.ImageIO.write(oImg, "JPEG", file) //Write a jpeg to the selected file location.
@@ -358,7 +381,7 @@ object resultsViewer extends JFXApp{
 					if(file!=null){
 						val ss = graph.snapshot(new SnapshotParameters, null)
 						val oImg = fromFXImage(ss,null)
-						if(file.toString.dropRight(4) != ".png"){
+						if(file.toString.takeRight(4) != ".png"){
 							file = new java.io.File((file.toString :+ ".png").mkString)
 						}
 						javax.imageio.ImageIO.write(oImg, "PNG", file)
@@ -375,13 +398,14 @@ object resultsViewer extends JFXApp{
 			gp.add(xAxisLock,0,4)
 			gp.add(yAxisLock,0,5)
 			gp.add(enableTTs,0,6)
-			val hb = new HBox(jpg,png) //Create a new hbox (horizontal box) node with the "export to jpg" and "export to png" buttons as children
+			val hb = new HBox(jpg,outCsv,png) //Create a new hbox (horizontal box) node with the "export to jpg" and "export to png" buttons as children
 			val vb = new VBox(gp,hb,txt,lv) //Create a new vbox (vertical box) node with the gridpane (with the checkboxes), hbox (with the buttons), "selected waveforms" text and the listview as children
 			vb.width.onChange{ //When the width of the vbox changes
 				hb.minWidth() = vb.width() //Set the hbox to fill the vbox horizontally (setting grow to always didn't always work)
 				txt.minWidth(vb.width()) //Set the text to fill the vbox horizontally
-				png.prefWidth() = vb.width() / 2.25d //Scale the buttons nicely
-				jpg.prefWidth() = vb.width() / 2.25d
+				png.prefWidth() = vb.width() / 3.375d //Scale the buttons nicely
+				jpg.prefWidth() = vb.width() / 3.375d
+				outCsv.prefWidth = vb.width() / 3.375d
 				hb.spacing() = vb.width()/10d //Set the spacing between the buttons
 				hb.padding() = Insets(vb.width()/180d,0d,vb.width()/180d,0d) //Set padding so that the buttons aren't right at the edge of the screen
 			}
