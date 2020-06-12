@@ -4,7 +4,7 @@
 
 * Source code is located in [src](../src)
 * Executables are located in [run](../run)
-* Some simple reference netlists can be found in [Sample Netlists](../Sample Netlists)
+* Some simple reference netlists can be found in [Sample Netlists](../Sample%20Netlists)
 
 ## Running
 
