@@ -1,8 +1,0 @@
-target/*
-project/project/*
-project/target/*
-*.csv
-.metals/*
-*.class
-*metals.sbt
-.bloop*
