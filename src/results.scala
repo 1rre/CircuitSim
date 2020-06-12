@@ -41,11 +41,10 @@ object plotUtils{ //An object used to make tooltips showing the value appear whe
 
 object resultsViewer extends JFXApp{
 	import plotUtils._ //Import the invisible box
-    stage = new PrimaryStage{ //Declare the main window of the program
+	stage = new PrimaryStage{ //Declare the main window of the program
 		maximized = true //Maximise the window
-		icons.add(new Image("file:project/lg.ico")) //Unacceptable
-        title = "Results Viewer" //Set the window name to "Results Viewer"
-        scene = new Scene{
+		title = "Results Viewer" //Set the window name to "Results Viewer"
+		scene = new Scene{
 			val in = stdin.mkString.split('\n') //Split all of std in into an array of lines (done after input is completed)
 			val lines = in.map(_.split(',')) //Split each of the lines in the array into an array of data points
 			val sci = StringConverter[Number]((s:String) => s.toDouble, (d:Number) => { //Create a version of "toString"/"toDouble" which converts to & from scientific notation
@@ -418,7 +417,7 @@ object resultsViewer extends JFXApp{
 				children = Seq(graph,cursorLoc) //Set the graph and cursor location text as the background
 			}
 			val box = new HBox(vb,sp) //Create a new hbox with the vbox and stackpane as children
-            root = box //set the root node of the program as this hbox
-        }
-    }
+			root = box //set the root node of the program as this hbox
+		}
+	}
 }
