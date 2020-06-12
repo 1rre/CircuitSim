@@ -8,7 +8,7 @@
 
 ## Running
 
-To run the program, run `./CircuitSim.sh [CIR FILE]`, or to use the [default netlist](../Sample Netlists/test_netlist_10.cir) run `./CircuitSim.sh`
+To run the program, run `./CircuitSim.sh [CIR FILE]`, or to use the [default netlist](../Sample%20Netlists/test_netlist_10.cir) run `./CircuitSim.sh`
 
 ## Prerequisites
 
