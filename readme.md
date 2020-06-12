@@ -20,4 +20,4 @@ To run the program, run `./CircuitSim.sh [CIR FILE]`, or to use the [default net
     sudo apt-get install libarmadillo-dev  
     sudo apt-get install sbt  
     sudo apt-get install openjdk-8-jre
-		```
+```
