@@ -1,4 +1,4 @@
-# Group 1 Circuit Simulator
+# Team 1 Circuit Simulator
 
 ## Files
 
