@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jnlp spec="1.0" xmlns:jfx="http://javafx.com" href="procirc_2.13.2-0.1.0-SNAPSHOT.jnlp">
+  <information>
+    <title>procirc</title>
+    <vendor>Unknown</vendor>
+    <description>procirc</description>
+    <offline-allowed/>
+  </information>
+  <resources>
+    <j2se version="" href="http://java.sun.com/products/autodl/j2se"/>
+    <jar href="procirc_2.13.2-0.1.0-SNAPSHOT.jar" size="43665" download="eager" />
+    <jar href="lib/javafx-base-14.0.1-linux.jar" size="751228" download="eager" />
+    <jar href="lib/javafx-base-14.0.1.jar" size="302" download="eager" />
+    <jar href="lib/javafx-controls-14.0.1-linux.jar" size="2530560" download="eager" />
+    <jar href="lib/javafx-controls-14.0.1.jar" size="306" download="eager" />
+    <jar href="lib/javafx-fxml-14.0.1-linux.jar" size="126766" download="eager" />
+    <jar href="lib/javafx-graphics-14.0.1-linux.jar" size="4957824" download="eager" />
+    <jar href="lib/javafx-graphics-14.0.1.jar" size="306" download="eager" />
+    <jar href="lib/javafx-media-14.0.1-linux.jar" size="1436482" download="eager" />
+    <jar href="lib/javafx-media-14.0.1.jar" size="303" download="eager" />
+    <jar href="lib/javafx-swing-14.0.1-linux.jar" size="88701" download="eager" />
+    <jar href="lib/javafx-web-14.0.1-linux.jar" size="32304530" download="eager" />
+    <jar href="lib/scala-library-2.13.2.jar" size="5865349" download="eager" />
+    <jar href="lib/scala-reflect-2.13.2.jar" size="3625052" download="eager" />
+    <jar href="lib/scalafx_2.13-14-R19.jar" size="3469637" download="eager" />
+  </resources>
+  <jfx:javafx-desc  width="800" height="800" main-class="resultsViewer"  name="procirc" />
+  <update check="background"/>
+</jnlp>
