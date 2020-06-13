@@ -6,7 +6,6 @@
 
 using namespace std;
 using namespace arma;
-
 /*
 
 	This function will construct the I and E matrices simultaneously (spelling? haha) by updating a single matrix in the form:
@@ -26,7 +25,6 @@ using namespace arma;
 	If the source is a voltage source, we will set E[x] to v where v is the voltage supplied by the source
 
 */
-
 mat getZ(mat mxPre1, mat mxPre2, Sim _, double time){
 	mat rtn = mat(mxPre1.n_rows,1).fill(0); //An empty matrix to fill up & return
 	const int nCnt = _.nodes.size() - 1; //The number of nodes excluding the reference node
@@ -46,29 +44,21 @@ mat getZ(mat mxPre1, mat mxPre2, Sim _, double time){
 			rtn(nCnt + iS.id,0) = val; //Set the index (z,0) in the E Matrix as equal to the value of the voltage source, where 'z' is the ID of the voltage source
 		}
 	}
-
 /*
 
 	The Z matrix will now be partially complete, having been updated for all the *independent* sources in the circuit.
 	We now need to add the values of the dependent sources, such as inductors and capacitors.
 
 */
-
 	for(auto dS : _.dSources){ //for each dependent current or voltage source "dS" in the vector of dependent sources
 		double val;
 		if(time>=0){
 			val = dS.waveform(mxPre1,mxPre2,_.timeStep); //We need the 2 previous "mx"es here, where "mx" is the X matrix which contains the voltages at each node.
-		}												 //We use that to calculate dV/dt for the capacitor and inductor transient equations.
+		}												 											 //We use that to calculate dV/dt for the capacitor and inductor transient equations.
 		else{ //From here this loop is written the same as the independent sources one.
 			val = dS.DCOffset;
 		}
-	//	if(dS.cName == 'I' || dS.cName == 'L'){
-		//rtn(dS.pos->ID - 1,0) += val;
-		//rtn(dS.neg->ID - 1,0) -= val;
-		//}
-		//else{
 		rtn[nCnt + dS.id] = val;
-		//}
 	}
 	return rtn; //Return the now filled matrix to the main program
 }

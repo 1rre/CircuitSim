@@ -14,7 +14,6 @@
 #include <armadillo>
 #include <tuple>
 
-
 using namespace std;
 using namespace arma;
 
@@ -76,6 +75,7 @@ struct Resistor:Component{ //A linear component such as a resistor, capacitor, i
 		return(abs(((*this).pos->voltage - this->neg->voltage)/this->val));
 	}
 };
+
 struct Source:Component{ //Only voltage sources here, I heard that current kills
 	double DCOffset;
 	function<double(double)> waveform; //use 'waveform(time);' to run function
@@ -428,6 +428,7 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 		}
 	}
 };
+
 struct DepSource:Source{ //TODO: Implement other dependent sources
 	function<double(Mat<double>,Mat<double>,double)> waveform;
 	void srcFunc(int id, vector<double> args){
@@ -472,7 +473,7 @@ struct DepSource:Source{ //TODO: Implement other dependent sources
 						vPre1= mxPre1(posNode - 1,0) - mxPre1(negNode - 1,0); // - mxPre1(negNode - 1,0); //Voltage across inductor at t-timestep
 						vPre2 = mxPre2(posNode - 1,0) - mxPre2(negNode - 1,0); // - mxPre2(negNode - 1,0); //Voltage across inductor at t-2·timestep
 					}
-					return ((vPre1 - vPre2) * cValue / ts) - (mxPre1(posNode - 1,0) + mxPre1(negNode - 1,0));	
+					return ((vPre1 - vPre2) * cValue / ts) - (mxPre1(posNode - 1,0) + mxPre1(negNode - 1,0));
 				};
 				break;}
 			case 2:{ //Voltage Trigger
@@ -490,6 +491,7 @@ struct DepSource:Source{ //TODO: Implement other dependent sources
 		}
 	}
 };
+
 class Sim{
 public:
 	void getComs();

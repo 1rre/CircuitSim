@@ -7,12 +7,10 @@
 using namespace std;
 using namespace arma;
 
-
 Mat<double> MatrixG(Sim s) // this function will return the G matrix, which shows the positions and vlues of all the resistors.
 {
   double N = s.nodes.size(); //number of nodes
   Mat<double> Gmatrix(N-1,N-1, fill::zeros); //constructing a matrix of the correct size for G
-
 
   for (size_t i = 0; i < s.resistors.size(); i++) { // for loop that cycles through each resistor
     double pos = s.resistors[i].pos->ID-1; // positive node. (-1) so that the matrix fills from 0
@@ -42,25 +40,17 @@ Mat<double> MatrixB(Sim s){ //Calculates Matrix B and stores the result in Matri
     }
   }
   for (size_t i = 0; i < s.dSources.size(); i++) {
-    //if (s.dSources[i].cName=='C') {
-      M+=1;
-    //}
+    M+=1;
   }
 
   double N = s.nodes.size()-1; // number of nodes
   double cnt=0;
   Mat<double> MatrixB(N,M,fill::zeros); // creating a matrix of the correct size initialised with zeros
-//  cout<<MatrixB<<endl;
-//  cout<<"N"<<N<<" "<<"M"<<M<<endl;
   for(int i = 0; i < s.sources.size(); i++){ //cycling through the sources vector
     if (s.sources[i].cName=='V') { // choosing the voltage sources and inductors
       double pos = s.sources[i].pos->ID-1;//finding the positive node
       double neg = s.sources[i].neg->ID-1;//finding the negative node
 
-//    cout<<s.sources[i].uName<<endl;
-//     cout<<i<<endl;
-//      cout<<"neg: "<<neg<<endl;
-//      cout<<"pos: "<<pos<<endl;
       if(pos>=0 && neg>=0) //if the source isnt connected to the reference node
       {
         MatrixB(pos,cnt)=1; //add the positive terminal
@@ -80,32 +70,23 @@ Mat<double> MatrixB(Sim s){ //Calculates Matrix B and stores the result in Matri
 //  cout<<MatrixB<<endl;
 
   for(int i = 0; i < s.dSources.size(); i++){ //cycling through the sources vector
-   // if (s.dSources[i].cName=='C') { // choosing the voltage sources and inductors
-      double pos = s.dSources[i].pos->ID-1;//finding the positive node
-      double neg = s.dSources[i].neg->ID-1;//finding the negative node
-
-  //cout<<s.dSources[i].uName<<endl;
-  //  cout<<i<<endl;
-  //  cout<<"neg: "<<neg<<endl;
-  //  cout<<"pos: "<<pos<<endl;
-      if(pos>=0 && neg>=0) //if the source isnt connected to the reference node
-      {
-        MatrixB(pos,cnt)=1; //add the positive terminal
-        MatrixB(neg,cnt)=-1; //add the negative terminal
-//cout<<MatrixB<<endl;
+    double pos = s.dSources[i].pos->ID-1;//finding the positive node
+    double neg = s.dSources[i].neg->ID-1;//finding the negative node
+    if(pos>=0 && neg>=0) //if the source isnt connected to the reference node
+    	{
+      MatrixB(pos,cnt)=1; //add the positive terminal
+    	MatrixB(neg,cnt)=-1; //add the negative terminal
       }
-      if (pos== -1) //if the positive terminal connects to the reference node
-      {
-        MatrixB(neg,cnt)=-1;
-      }
-      if (neg== -1)//if the negative termainal connects to the reference node
-      {
-        MatrixB(pos,cnt)=1;
-      }
-      cnt+=1;
+    if (pos== -1) //if the positive terminal connects to the reference node
+    {
+      MatrixB(neg,cnt)=-1;
+  	}
+    if (neg== -1)//if the negative termainal connects to the reference node
+    {
+      MatrixB(pos,cnt)=1;
     }
-  //  cout<<MatrixB<<endl;
- // }
+    cnt+=1;
+  }
   return MatrixB;// return the completed B matrix
 }
 
@@ -124,13 +105,10 @@ Mat<double> MatrixD(Sim s)
     }
   }
   for (size_t i = 0; i < s.dSources.size(); i++) {
-  //  if (s.dSources[i].cName=='C') {
-      M+=1;
-    //}
+  	M+=1;
   }
   Mat<double> D(M,M,fill::zeros);
   return D;
-
 }
 
 Mat<double> GetA(Sim s)
@@ -143,31 +121,16 @@ Mat<double> GetA(Sim s)
     }
   }
   for (size_t i = 0; i < s.dSources.size(); i++) {
-  //  if (s.dSources[i].cName=='C') {
-      M+=1;
-    //}
+    M+=1;
   }
   Mat<double> A((N+M),(N+M),fill::zeros);
-  //cout<<A<<endl;
   Mat<double> G = MatrixG(s);
-  //cout<<G<<endl;
   Mat<double> B = MatrixB(s);
-  //cout<<B<<endl;
   Mat<double> C = MatrixC(s);
-  //cout<<C<<endl;
   Mat<double> D = MatrixD(s);
-  //cout<<D<<endl;
-  //cout<<"N"<<N<<endl;
-  //cout<<"M"<<M<<endl;
   A(span(0,N-1),span(0,N-1)) = G;
-  //cout<<"G"<<endl;
-  //cout<<A<<endl;
   A(span(0,N-1),span(N,N+M-1)) = B;
-  //cout<<"B"<<endl;
   A(span(N,N+M-1),span(0,N-1)) = C;
-  //cout<<"C"<<endl;
   A(span(N,N+M-1),span(N,N+M-1)) = D;
-  //cout<<"D"<<endl;
-  //cout<<A<<endl;
   return A;
 }
