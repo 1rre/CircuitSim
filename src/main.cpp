@@ -33,7 +33,7 @@ int main(){
 	for(auto r : _.resistors){
 		header += (",I(" + r.uName + ")"); //Add a current header for each resistor
 	}
-	cout<<header.substr(1)<<endl; //Print the header minus the leading comma to std out
+	string output = header.substr(1) + '\n'; //Print the header minus the leading comma to std out
 	mat mxPre1 = mat(ma.n_rows,0).fill(0);
 	mat mxPre2 = mat(ma.n_rows,0).fill(0);
 	mat mz = getZ(mxPre1, mxPre2, _, -1); //Get matrix Z at time -1
@@ -63,7 +63,7 @@ int main(){
 		for(auto dS : _.dSources){
 			s += ("," + to_string(dS.waveform(mxPre1,mxPre2,0))); //add the current of each capacitor to the string
 		}
-		cout<<s.substr(1)<<endl; //Print the voltages and currents to std out
+		output += (s.substr(1) + '\n'); //Print the voltages and currents to std out
 	}
 	for(double time = _.start; time<_.end; time+=_.timeStep){ //for each timestep from the start to the end
 		mz = getZ(mxPre1, mxPre2, _, time); //get the Z matrix at the current time
@@ -93,8 +93,8 @@ int main(){
 			for(auto dS : _.dSources){
 				s += ("," + to_string(dS.waveform(mxPre1,mxPre2,time))); //add the current of each capacitor to the string
 			}
-			s+='\n'; //Add a newline to the string.
-			cout<<s; //Print the voltages and currents to std out
+			output += (s + '\n'); //Add a newline to the string.
 		}
 	}
+	cout<<output;
 }
