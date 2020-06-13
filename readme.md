@@ -12,7 +12,7 @@ To run the program, run `./CircuitSim.sh [CIR FILE]`, or to use the [default net
 
 ## Prerequisites
 
-* You must have JDK version 8 installed to run the program. This can be installed on debian via `sudo apt-get install openjdk-8-jre`. The [C++ binary](run/wv) can be run without any prerequisites installed.
+* You must have JDK version 8 installed to run the program. This can be installed on debian via `sudo apt-get install openjdk-8-jre`. The [C++ binary](run/CircuitSim) can be run without any prerequisites installed.
 * To compile the [source code](src), you must have "sbt" and "Armadillo" installed on your system. These can be installed with:
 ```
     sudo apt-get install liblapack-dev  
