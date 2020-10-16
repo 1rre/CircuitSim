@@ -1,20 +1,5 @@
-import scalafx._, Includes._, application.JFXApp,
-		   JFXApp.PrimaryStage, scene._, image.{Image,WritableImage},
-			 collections._, shape.Circle, chart._,
-			 text.{Text,Font,TextAlignment},
-			 input.{MouseEvent,ScrollEvent,MouseDragEvent},
-			 layout._ , Priority.{Always,Sometimes}, 
-			 XYChart.{Series,Data}, 
-			 control.{Label,Tooltip,ListView,CheckBox,Button}, 
-			 control.cell.CheckBoxListCell,
-			 stage.{Stage,FileChooser,Window},
-			 geometry.Pos.{CenterLeft,CenterRight,Center,BottomLeft},
-			 geometry.Insets, scalafx.util.{Duration,StringConverter},
-			 scala.io.Source._, 
-			 beans.property.{BooleanProperty,ObjectProperty},
-			 embed.swing.SwingFXUtils.fromFXImage, paint.Color.web
-
-object plotUtils{
+import scalafx._, Includes._, application.JFXApp, JFXApp.PrimaryStage, scene._, image.{Image,WritableImage}, collections._, shape.Circle, chart._, text.{Text,Font,TextAlignment}, input.{MouseEvent,ScrollEvent,MouseDragEvent}, layout._ , Priority.{Always,Sometimes}, XYChart.{Series,Data}, control.{Label,Tooltip,ListView,CheckBox,Button}, control.cell.CheckBoxListCell, stage.{Stage,FileChooser,Window}, geometry.Pos.{CenterLeft,CenterRight,Center,BottomLeft}, geometry.Insets, scalafx.util.{Duration,StringConverter}, scala.io.Source._, beans.property.{BooleanProperty,ObjectProperty}, embed.swing.SwingFXUtils.fromFXImage, paint.Color.web
+object plotUtils {
 	val enableTT = BooleanProperty(false)
 	def hn(x:Double,y:Double):Label = {
 		val rtn = new Label
@@ -24,16 +9,13 @@ object plotUtils{
 		tt.showDelay = new Duration(0d)
 		rtn.tooltip = tt
 		rtn.style = "-fx-background-color: transparent;"
-		enableTT.onChange{
-			rtn.visible() = !rtn.visible()
-		}
+		enableTT.onChange {	rtn.visible() = !rtn.visible() }
 		rtn
 	}
 }
-
-object resultsViewer extends JFXApp{
+object resultsViewer extends JFXApp {
 	import plotUtils._
-	stage = new PrimaryStage{
+	stage = new PrimaryStage {
 		maximized = true
 		title = "Results Viewer"
 		scene = new Scene{
@@ -41,39 +23,23 @@ object resultsViewer extends JFXApp{
 			val lines = in.map(_.split(','))
 			val sci = StringConverter[Number]((s:String) => s.toDouble, (d:Number) => {
 				val split = d.asInstanceOf[Double].toString.split('E')
-				if(split.length == 2){
-					split(0).take(6).padTo(6, '0') + "E" + split(1)
-				}
-				else{
-					split(0).take(6) + Seq.fill[Char](6-split(0).take(6).length)('0').mkString
-				}
+				if(split.length == 2) split(0).take(6).padTo(6, '0') + "E" + split(1)
+				else split(0).take(6) + Seq.fill[Char](6-split(0).take(6).length)('0').mkString
 			})
-			val cursorLoc = new Text(""){
+			val cursorLoc = new Text("") {
 				visible() = false
 				alignmentInParent = BottomLeft
 			}
-
-			//CREATE THE AXES
 			val xAxis  = NumberAxis("Time")
 			xAxis.forceZeroInRange() = false
 			xAxis.tickLabelFormatter() = sci
-			xAxis.upperBound.onChange{
-				xAxis.tickUnit() = (xAxis.upperBound() - xAxis.lowerBound()) / 15d
-			}
-			xAxis.lowerBound.onChange{
-				xAxis.tickUnit() = (xAxis.upperBound() - xAxis.lowerBound()) / 15d
-			}
+			xAxis.upperBound.onChange { xAxis.tickUnit() = (xAxis.upperBound() - xAxis.lowerBound()) / 15d }
+			xAxis.lowerBound.onChange { xAxis.tickUnit() = (xAxis.upperBound() - xAxis.lowerBound()) / 15d }
 			val yAxis = NumberAxis("Voltage | Current")
 			yAxis.forceZeroInRange() = false
 			yAxis.tickLabelFormatter() = sci
-			yAxis.upperBound.onChange{
-				yAxis.tickUnit() =(yAxis.upperBound() - yAxis.lowerBound()) / 10d
-			}
-			yAxis.lowerBound.onChange{
-				yAxis.tickUnit() =(yAxis.upperBound() - yAxis.lowerBound()) / 10d
-			}
-
-			//CREATE THE CHECKBOXES
+			yAxis.upperBound.onChange { yAxis.tickUnit() =(yAxis.upperBound() - yAxis.lowerBound()) / 10d }
+			yAxis.lowerBound.onChange { yAxis.tickUnit() =(yAxis.upperBound() - yAxis.lowerBound()) / 10d }
 			val xAxisAR = new CheckBox("Autorange Time Axis"){
 				selected() = true
 				padding() = Insets(5d,10d,5d,10d)
@@ -81,25 +47,18 @@ object resultsViewer extends JFXApp{
 					xAxis.autoRanging() = !xAxis.autoRanging()
 				}
 			}
-			//There are a lot so I won't repeat comments
 			val yAxisAR = new CheckBox("Autorange Data Axis"){
 				selected() = true
 				padding() = Insets(5d,10d,5d,10d)
-				selected.onChange{
-					yAxis.autoRanging() = !yAxis.autoRanging()
-				}
+				selected.onChange { yAxis.autoRanging() = !yAxis.autoRanging() }
 			}
 			val xAxis0 = new CheckBox("Force 0 on Time Axis"){
 				selected() = false
 				padding() = Insets(5d,10d,5d,10d)
 				selected.onChange{
 					xAxis.forceZeroInRange() = !xAxis.forceZeroInRange()
-					if(xAxis.lowerBound() > 0d){
-						xAxis.lowerBound() = 0d
-					}
-					else if(xAxis.upperBound() < 0d){
-						xAxis.upperBound() = 0d
-					}
+					if(xAxis.lowerBound() > 0d) xAxis.lowerBound() = 0d
+					else if(xAxis.upperBound() < 0d) xAxis.upperBound() = 0d
 				}
 			}
 			val yAxis0 = new CheckBox("Force 0 on Data Axis"){
@@ -107,12 +66,8 @@ object resultsViewer extends JFXApp{
 				padding() = Insets(5d,10d,5d,10d)
 				selected.onChange{
 					yAxis.forceZeroInRange() = !yAxis.forceZeroInRange()
-					if(yAxis.lowerBound() > 0d){
-						yAxis.lowerBound() = 0d
-					}
-					else if(yAxis.upperBound() < 0d){
-						yAxis.upperBound() = 0d
-					}
+					if(yAxis.lowerBound() > 0d) { yAxis.lowerBound() = 0d }
+					else if(yAxis.upperBound() < 0d) { yAxis.upperBound() = 0d }
 				}
 			}
 			val xAxisLock = new CheckBox("Lock Time Axis"){
@@ -136,9 +91,7 @@ object resultsViewer extends JFXApp{
 			val enableTTs = new CheckBox("Enable Values On Hover"){
 				selected() = false
 				padding() = Insets(5d,10d,5d,10d)
-				selected.onChange{
-					enableTT() = !enableTT()
-				}
+				selected.onChange { enableTT() = !enableTT() }
 			}
 			xAxis.autoRanging.onChange{
 				xAxisLock.disable() = xAxis.autoRanging()
