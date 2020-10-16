@@ -23,105 +23,144 @@ double getVal(string num){ //The function that a number with a unit prefix (ie 1
 		case 'p': //Pico
 		val = stod(num.substr(0, num.length()-1))*1e-12; //Value is the numerical part of the input string by 10⁻¹²
 		break;
+		
 		case 'n': //Nano
 		val = stod(num.substr(0, num.length()-1))*1e-9; //Value is the numerical part of the input string by 10⁻⁹
 		break;
+
 		case 'u': //Micro
 		val = stod(num.substr(0, num.length()-1))*1e-6; //Value is the numerical part of the input string by 10⁻⁶
 		break;
-		/*		case 'μ':
+
+		case 'μ':
 		val = stod(num.substr(0, num.length()-1))*1e-6; //Value is the numerical part of the input string by 10⁻⁶ //μ cannot be stored as a char so disabled for the time being
-		break;*/
+		break;
+
 		case 'm': //milli
 		val = stod(num.substr(0, num.length()-1))*1e-3; //Value is the numerical part of the input string by 10⁻³
 		break;
+
 		case 'k': //kilo
 		val = stod(num.substr(0, num.length()-1))*1e3; //Value is the numerical part of the input string by 10³
 		break;
+
 		case 'g': //mega - g as mega is used as MEG
 		val = stod(num.substr(0, num.length()-3))*1e6; //Value is the numerical part of the input string by 10⁶
 		break;
+
 		case 'G': //giga
 		val = stod(num.substr(0, num.length()-1))*1e9; //Value is the numerical part of the input string multiplied by 10⁹
 		break;
+
 		default: //If there is no unit prefix. Safeguards are not required here as this function is only called after regex_search or regex_match, which identifies the value as correctly formed.
+		
 		val = stod(num); //Value is the input string
 	}
 	return val;
 }
 
-class Node{ //A node. As the nodes are numbered 0 or from N001 to N999 we can give them a unique integer ID directly from the CIR file
+class Node 
+{ //A node. As the nodes are numbered 0 or from N001 to N999 we can give them a unique integer ID directly from the CIR file
 public:
 	int ID = -1; //Used as the key for the right and left component maps
 	double voltage;
 	Node(int id);
 };
-Node::Node(int id){ //Constructor for a node where there is a nonzero voltage, ie not the reference node
+Node::Node(int id)
+{ //Constructor for a node where there is a nonzero voltage, ie not the reference node
 	this->ID = id;
 	this->voltage = double(0);
 }
-struct Component{
-    char cName; //The component name ie "Resistor", "Capacitor" etc.
-    string uName; //The name of the component as in the CIR file ie "R1", "Vin" etc.
-    int id; //The unique (between components of the same type) identifier for the component.
-    Node* pos; //The node to the "right" of this component. This is the cathode/positive pin of polar components.
-    Node* neg; //The node to the "left" of this component. This is the anode/negative pin of polar components.
+struct Component
+{
+  char cName; //The component name ie "Resistor", "Capacitor" etc.
+  string uName; //The name of the component as in the CIR file ie "R1", "Vin" etc.
+	int id; //The unique (between components of the same type) identifier for the component.
+	Node* pos; //The node to the "right" of this component. This is the cathode/positive pin of polar components.
+	Node* neg; //The node to the "left" of this component. This is the anode/negative pin of polar components.
 };
-struct Resistor:Component{ //A linear component such as a resistor, capacitor, inductor or non-dependant source
+
+struct Resistor:Component
+{ //A linear component such as a resistor, capacitor, inductor or non-dependant source
 	double val; //the value of the component in SI units. In sources this is the DC offset.
-	double findCur(){
+	double findCur()
+	{
 		auto x = (*this).pos;
 		auto y = *(x);
 		return(abs(((*this).pos->voltage - this->neg->voltage)/this->val));
 	}
 };
 
-struct Source:Component{ //Only voltage sources here, I heard that current kills
+struct Source:Component
+{ //Only voltage sources here, I heard that current kills
 	double DCOffset;
 	function<double(double)> waveform; //use 'waveform(time);' to run function
-	void srcFunc(int id, vector<double> args){
-		switch(id){
+	void srcFunc(int id, vector<double> args)
+	{
+		switch(id)
+		{
 			case 0: //DC
 				this->DCOffset = args[0];
 				this->waveform = [args](double time){ return args[0]; };
 			break;
-			case 1:{ //Pulse
+
+			case 1:
+			{ //Pulse
 				double vInitial = 0, vOn = 0, tDelay = 0, tRise = 0, tFall = 0, tOn = 0, tPeriod = numeric_limits<double>::infinity(), nCycles = numeric_limits<double>::infinity();
-				switch(args.size()){
+				switch(args.size())
+				{
 					case 1:{ //Vinitial
 						vInitial = args[0];
-						break;}
-					case 2:{ //Prevs & Von
+						break;
+					}
+
+					case 2:
+					{ //Prevs & Von
 						vInitial = args[0];
 						vOn = args[1];
-						break;}
-					case 3:{ //Prevs & Tdelay
+						break;
+					}
+
+					case 3:
+					{ //Prevs & Tdelay
 						vInitial = args[0];
 						vOn = args[1];
 						tDelay = args[2];
-						break;}
-					case 4:{ //Prevs & Trise
+						break;
+					}
+
+					case 4:
+					{ //Prevs & Trise
 						vInitial = args[0];
 						vOn = args[1];
 						tDelay = args[2];
 						tRise = args[3];
-						break;}
-					case 5:{ //Prevs & Tfall
+						break;
+					}
+
+					case 5:
+					{ //Prevs & Tfall
 						vInitial = args[0];
 						vOn = args[1];
 						tDelay = args[2];
 						tRise = args[3];
 						tFall = args[4];
-						break;}
-					case 6:{ //Prevs & Ton
+						break;
+					}
+					
+					case 6:
+					{ //Prevs & Ton
 						vInitial = args[0];
 						vOn = args[1];
 						tDelay = args[2];
 						tRise = args[3];
 						tFall = args[4];
 						tOn = args[5];
-						break;}
-					case 7:{ //Prevs & Tperiod
+						break;
+					}
+
+					case 7:
+					{ //Prevs & Tperiod
 						vInitial = args[0];
 						vOn = args[1];
 						tDelay = args[2];
@@ -129,18 +168,23 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 						tFall = args[4];
 						tOn = args[5];
 						tPeriod = args[6];
-						if(tOn != 0 && tPeriod < tRise + tFall + tOn){
+						if(tOn != 0 && tPeriod < tRise + tFall + tOn)
+						{
 							cerr<<"Source period does not match with active time. Exiting."<<endl;
 							exit(3);
 						}
-						else if(tPeriod < tRise + tFall){
+						else if(tPeriod < tRise + tFall)
+						{
 							double disp = tPeriod/(tRise + tFall);
 							vOn *= disp;
 							tRise *= disp;
 							tFall *= disp;
 						}
-						break;}
-					case 8:{ //Prevs & Ncycles
+						break;
+					}
+
+					case 8:
+					{ //Prevs & Ncycles
 						vInitial = args[0];
 						vOn = args[1];
 						tDelay = args[2];
@@ -149,17 +193,20 @@ struct Source:Component{ //Only voltage sources here, I heard that current kills
 						tOn = args[5];
 						tPeriod = args[6];
 						nCycles = args[7];
-						if(tOn != 0 && tPeriod < tRise + tFall + tOn){
+						if(tOn != 0 && tPeriod < tRise + tFall + tOn)
+						{
 							cerr<<"Source period does not match with active time. Exiting."<<endl;
 							exit(3);
 						}
-						else if(tPeriod < tRise + tFall){
+						else if(tPeriod < tRise + tFall)
+						{
 							double disp = tPeriod/(tRise + tFall);
 							vOn *= disp;
 							tRise *= disp;
 							tFall *= disp;
 						}
-						break;}
+						break;
+					}
 				}
 				this->DCOffset = vInitial;
 				this->waveform = [vInitial, vOn, tDelay, tRise, tFall, tOn, tPeriod, nCycles](double time){
