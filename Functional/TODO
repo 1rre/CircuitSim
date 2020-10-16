@@ -1,0 +1,6 @@
+# Voltages can be represented by "Components" (parts of a voltage which each have their own frequency & can be weighted to give phase etc.)
+
+
+* Find subcircuits
+* Assign currents
+* Assign voltages
