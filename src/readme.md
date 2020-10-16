@@ -6,3 +6,4 @@
 * The C++ program to form the 'Z' matrix can be found in [Matrix.hpp](/src/matrix.hpp)
 * The C++ class declarations and the function which parses the netlist can be found in [component.hpp](/src/component.hpp)
 * The C++ main function can be found in [main.cpp](/src/main.cpp)
+* The fully functioning Scala version of the circuit simulator can be found in [circuit.scala](/src/circuit.scala)
