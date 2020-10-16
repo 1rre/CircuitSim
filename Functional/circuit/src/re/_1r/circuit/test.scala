@@ -5,27 +5,9 @@ import Numerics._
 import org.apache.commons.math3.complex.Complex
 import org.apache.commons.math3.linear._
 
-object Test extends App {
-  Test1
-}
-
-object Test1 {
-  val ndList = Vector(
-    new Node(0),
-    new Node(1),
-    new Node(2),
-    new Node(3)
-  )
-  val cmpList = Vector(
-    new VoltageSrc(4, ndList(0), ndList(1), 0,"V1"),
-    new Impeder(1.5e3, ndList(1), ndList(2), 0, "R1"),
-    new Impeder(3.6e3, ndList(1), ndList(2), 1, "R2"),
-    new Impeder(4.9e3, ndList(1), ndList(3), 2, "R3"),
-    new Impeder(1.3e4, ndList(2), ndList(3), 3, "R4"),
-    new Impeder(2.9e3, ndList(3), ndList(0), 4, "R5"),
-    new VoltageSrc(1, ndList(1), ndList(2), 1, "V2")
-  )
-  def x = cmpList.collect{case v: VoltageSrc => v}.map(v => {
+object Test {
+  def test(cmpList: Array[Component], ndList: Array[Node]) {
+      def x = cmpList.collect{case v: VoltageSrc => v}.map(v => {
     ndList.map(nd => {
       nd.reference = false
       nd.addVoltage = new Voltage(0,0,0,0)
@@ -48,4 +30,5 @@ object Test1 {
     println(y._2)
     y._1.foreach(n => println(n.toString + ": " + n.addVoltage(0) + ", " + n.reference + ", " + n.defined))
   })
+  }
 }
