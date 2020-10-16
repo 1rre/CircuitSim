@@ -93,43 +93,27 @@ object resultsViewer extends JFXApp {
 				padding() = Insets(5d,10d,5d,10d)
 				selected.onChange { enableTT() = !enableTT() }
 			}
-			xAxis.autoRanging.onChange{
-				xAxisLock.disable() = xAxis.autoRanging()
-			}
-			yAxis.autoRanging.onChange{
-				yAxisLock.disable() = yAxis.autoRanging()
-			}
+			xAxis.autoRanging.onChange { xAxisLock.disable() = xAxis.autoRanging() }
+			yAxis.autoRanging.onChange {yAxisLock.disable() = yAxis.autoRanging()}
 			var graph = new LineChart(xAxis,yAxis) {
 				title = "Circuit Details"
 				hgrow = Always
 				legendVisible() = false
-				legendVisible.onChange{
-					legendVisible() = false
-				}
-				onMouseEntered = (me:MouseEvent) => {
-					if(me.x > (82d * width() / 1670d)  && me.x < (1659d * width() / 1670d) && me.y > (42d * height() / 1016d) && me.y < (956d * height() / 1016d)){
+				legendVisible.onChange { legendVisible() = false }
+				onMouseEntered = (me:MouseEvent) => if(me.x > (82d * width() / 1670d)  && me.x < (1659d * width() / 1670d) && me.y > (42d * height() / 1016d) && me.y < (956d * height() / 1016d)){
 						cursorLoc.visible() = true
 						val xLoc:Double = ((me.x - 82d * width() / 1670d) / (1575d * width() / 1670d) * (xAxis.upperBound - xAxis.lowerBound).toDouble + xAxis.lowerBound.toDouble)
 						val yLoc:Double = (((956d * height() / 1016d) - me.y) / (912d * height() / 1016d) * (yAxis.upperBound - yAxis.lowerBound).toDouble + yAxis.lowerBound.toDouble)
 						cursorLoc.text = "(" +  xLoc  + ", " + yLoc + ")"
 					}
+				onMouseMoved = (me:MouseEvent) => if(!(me.x > (82d * width() / 1670d)  && me.x < (1659d * width() / 1670d) && me.y > (42d * height() / 1016d) && me.y < (956d * height() / 1016d))) cursorLoc.visible() = false
+				else {
+					cursorLoc.visible() = true
+					val xLoc:Double = ((me.x - 82d * width() / 1670d) / (1575d * width() / 1670d) * (xAxis.upperBound - xAxis.lowerBound).toDouble + xAxis.lowerBound.toDouble)
+					val yLoc:Double = (((956d * height() / 1016d) - me.y) / (912d * height() / 1016d) * (yAxis.upperBound - yAxis.lowerBound).toDouble + yAxis.lowerBound.toDouble) 
+					cursorLoc.text = "(" +  xLoc  + ", " + yLoc + ")"
 				}
-				onMouseMoved = (me:MouseEvent) => {
-					if(!(me.x > (82d * width() / 1670d)  && me.x < (1659d * width() / 1670d) && me.y > (42d * height() / 1016d) && me.y < (956d * height() / 1016d))){
-						cursorLoc.visible() = false
-					}
-					else{
-						cursorLoc.visible() = true
-						val xLoc:Double = ((me.x - 82d * width() / 1670d) / (1575d * width() / 1670d) * (xAxis.upperBound - xAxis.lowerBound).toDouble + xAxis.lowerBound.toDouble)
-						val yLoc:Double = (((956d * height() / 1016d) - me.y) / (912d * height() / 1016d) * (yAxis.upperBound - yAxis.lowerBound).toDouble + yAxis.lowerBound.toDouble) 
-						cursorLoc.text = "(" +  xLoc  + ", " + yLoc + ")"
-					}
-				}
-				onMouseExited = (me:MouseEvent) => {
-					cursorLoc.visible() = false
-				}
-
-				//SCROLL FUNCTIONALITY ON GRAPH
+				onMouseExited = (me:MouseEvent) => cursorLoc.visible() = false
 				onScroll = (me:ScrollEvent) =>{
 					if(me.controlDown){
 						if(!xAxisLock.selected() && !xAxisAR.selected()){
@@ -141,23 +125,17 @@ object resultsViewer extends JFXApp {
 								if(xAxis.lowerBound() < 0d){
 									xAxis.lowerBound() = xAxis.lowerBound() - me.deltaY * diff / height()
 								}
-							}
-							else{
+							} else {
 								xAxis.lowerBound() = xAxis.lowerBound() + me.deltaY * diff / height()
 								xAxis.upperBound() = xAxis.upperBound() - me.deltaY * diff / height()
 							}
 						}
 						if(!yAxisLock.selected() && !yAxisAR.selected()){
 							val diff = if(yAxis.upperBound() - yAxis.lowerBound() > 0) yAxis.upperBound() - yAxis.lowerBound() else 1e-100d
-							if(yAxis0.selected()){
-								if(yAxis.upperBound() >= 0d){
-									yAxis.upperBound() = yAxis.upperBound() + me.deltaY * diff / height()
-								}
-								if(yAxis.lowerBound() <= 0d){
-									yAxis.lowerBound() = yAxis.lowerBound() - me.deltaY * diff / height()
-								}
-							}
-							else{
+							if(yAxis0.selected()) {
+								if(yAxis.upperBound() >= 0d) yAxis.upperBound() = yAxis.upperBound() + me.deltaY * diff / height()
+								if(yAxis.lowerBound() <= 0d) yAxis.lowerBound() = yAxis.lowerBound() - me.deltaY * diff / height()
+							} else {
 								yAxis.lowerBound() = yAxis.lowerBound() + me.deltaY * diff / height()
 								yAxis.upperBound() = yAxis.upperBound() - me.deltaY * diff / height()
 							}
@@ -166,14 +144,9 @@ object resultsViewer extends JFXApp {
 					else if(me.shiftDown && !xAxisLock.selected() && !xAxisAR.selected()){
 						val diff = if (xAxis.upperBound() - xAxis.lowerBound() > 0) xAxis.upperBound() - xAxis.lowerBound() else 1e-100d
 						if(xAxis0.selected()){
-							if(xAxis.upperBound() > 0d){
-								xAxis.upperBound() = xAxis.upperBound() - me.deltaX * diff / width()
-							}
-							if(xAxis.lowerBound() < 0d){
-								xAxis.lowerBound() = xAxis.lowerBound() - me.deltaX * diff / width()
-							}
-						}
-						else{
+							if(xAxis.upperBound() > 0d) xAxis.upperBound() = xAxis.upperBound() - me.deltaX * diff / width()
+							if(xAxis.lowerBound() < 0d) xAxis.lowerBound() = xAxis.lowerBound() - me.deltaX * diff / width()
+						} else {
 							xAxis.lowerBound() = xAxis.lowerBound() - me.deltaX * diff / width()
 							xAxis.upperBound() = xAxis.upperBound() - me.deltaX * diff / width()
 						}
@@ -181,41 +154,25 @@ object resultsViewer extends JFXApp {
 					else if(!yAxisLock.selected() && !yAxisAR.selected()){
 						val diff = if(yAxis.upperBound() - yAxis.lowerBound() > 0) yAxis.upperBound() - yAxis.lowerBound() else 1e-100d
 						if(yAxis0.selected()){
-							if(yAxis.upperBound() >= 0d){
-								yAxis.upperBound() = yAxis.upperBound() + me.deltaY * diff / height()
-							}
-							if(yAxis.lowerBound() <= 0d){
-								yAxis.lowerBound() = yAxis.lowerBound() + me.deltaY * diff / height()
-							}
-						}
-						else{
+							if(yAxis.upperBound() >= 0d) yAxis.upperBound() = yAxis.upperBound() + me.deltaY * diff / height()
+							if(yAxis.lowerBound() <= 0d) yAxis.lowerBound() = yAxis.lowerBound() + me.deltaY * diff / height()
+						} else {
 							yAxis.lowerBound() = yAxis.lowerBound() + me.deltaY * diff / height()
 							yAxis.upperBound() = yAxis.upperBound() + me.deltaY * diff / height()
 						}
 					}
 					me.consume()
 				}
-
-				//DRAG FUNCTIONALITY ON GRAPH
 				var origin = (0d,0d,0d,0d,0d,0d)
-				onMousePressed = (me:MouseEvent) => {
-					origin = (me.sceneX,xAxis.lowerBound(),xAxis.upperBound(),me.sceneY,yAxis.lowerBound(),yAxis.upperBound())
-				}
-				onMouseReleased = (me:MouseEvent) => {
-					origin = (0d,0d,0d,0d,0d,0d)
-				}
+				onMousePressed = (me:MouseEvent) => origin = (me.sceneX,xAxis.lowerBound(),xAxis.upperBound(),me.sceneY,yAxis.lowerBound(),yAxis.upperBound())
+				onMouseReleased = (me:MouseEvent) => origin = (0d,0d,0d,0d,0d,0d)
 				onMouseDragged = (me:MouseEvent) => {
-					if(!xAxisLock.selected() && !xAxisAR.selected()){
+					if(!xAxisLock.selected() && !xAxisAR.selected()) {
 						val diff = origin._3 - origin._2
 						if(xAxis0.selected()){
-							if(xAxis.upperBound() > 0d){
-								xAxis.upperBound() = origin._3 + (origin._1 - me.sceneX) * diff / width()
-							}
-							if(xAxis.lowerBound() < 0d){
-								xAxis.lowerBound() = origin._2 + (origin._1 - me.sceneX) * diff / width()
-							}
-						}
-						else{
+							if(xAxis.upperBound() > 0d) xAxis.upperBound() = origin._3 + (origin._1 - me.sceneX) * diff / width()
+							if(xAxis.lowerBound() < 0d) xAxis.lowerBound() = origin._2 + (origin._1 - me.sceneX) * diff / width()
+						} else {
 							xAxis.lowerBound() = origin._2 + (origin._1 - me.sceneX) * diff / width()
 							xAxis.upperBound() = origin._3 + (origin._1 - me.sceneX) * diff / width()
 						}
@@ -223,14 +180,9 @@ object resultsViewer extends JFXApp {
 					if(!yAxisLock.selected() && !yAxisAR.selected()){
 						val diff = origin._6 - origin._5
 						if(yAxis0.selected()){
-							if(yAxis.upperBound() >= 0d){
-								yAxis.upperBound() = origin._6 - (origin._4 - me.y) * diff / height()
-							}
-							if(yAxis.lowerBound() <= 0d){
-								yAxis.lowerBound() = origin._5 - (origin._4 - me.y) * diff / height()
-							}
-						}
-						else{
+							if(yAxis.upperBound() >= 0d) yAxis.upperBound() = origin._6 - (origin._4 - me.y) * diff / height()
+							if(yAxis.lowerBound() <= 0d) yAxis.lowerBound() = origin._5 - (origin._4 - me.y) * diff / height()
+						} else {
 							yAxis.lowerBound() = origin._5 - (origin._4 - me.y) * diff / height()
 							yAxis.upperBound() = origin._6 - (origin._4 - me.y) * diff / height()
 						}
@@ -250,14 +202,7 @@ object resultsViewer extends JFXApp {
 					})
 				})
 				val bChange = BooleanProperty(false)
-				bChange.onChange {
-					if(bChange()){
-						graph.data() = graph.data() ++= Seq(srs)
-					}
-					else{
-						graph.data() = graph.data().filter(it => it != srs)
-					}
-				}
+				bChange.onChange { if(bChange()) graph.data() = graph.data() ++= Seq(srs) else graph.data() = graph.data().filter(it => it != srs) }
 				acc :+ (srs,bChange)
 			})
 			val sc = StringConverter[(javafx.scene.chart.XYChart.Series[Number, Number],BooleanProperty)]((s:String) => series.find((ser) => ser._1.name() == s).get, {(v:(javafx.scene.chart.XYChart.Series[Number, Number],BooleanProperty)) => v._1.name()})
@@ -266,12 +211,12 @@ object resultsViewer extends JFXApp {
 				cellFactory = ((lv) => lb)
 				vgrow = Sometimes
 			}
-			val txt = new Text("Selected Waveforms:"){
+			val txt = new Text("Selected Waveforms:") {
 				vgrow = Always
 				hgrow = Always
 				style = "-fx-font-size:18;"
 			}
-			val outCsv = new Button("Export to\nCSV"){
+			val outCsv = new Button("Export to\nCSV") {
 				hgrow = Always
 				textAlignment = TextAlignment.Center
 				alignment = Center
@@ -285,7 +230,7 @@ object resultsViewer extends JFXApp {
 					val writer = {
 						if(file.takeRight(4) != ".csv" && file != "") new FileWriter(file + ".csv")
 						else if(file != "") new FileWriter(file)
-						else{
+						else {
 							import util.Properties.{userDir, osName}
 							val separator = if (osName.take(3) == "Win") '\\' else '/'
 							new FileWriter(userDir + separator + "out.csv")
@@ -308,9 +253,7 @@ object resultsViewer extends JFXApp {
 					if(file!=null){
 						val ss = graph.snapshot(new SnapshotParameters, null)
 						val oImg = fromFXImage(ss,null)
-						if(file.toString.takeRight(4) != ".jpg"){
-							file = new java.io.File(file.toString + ".jpg")
-						}
+						if(file.toString.takeRight(4) != ".jpg") file = new java.io.File(file.toString + ".jpg")
 						javax.imageio.ImageIO.write(oImg, "JPEG", file)
 					}
 				}
@@ -335,9 +278,7 @@ object resultsViewer extends JFXApp {
 					}
 				}
 			}
-			val gp:GridPane = new GridPane(){
-				border() = new Border(new BorderStroke(web("0x000000"),BorderStrokeStyle.Solid,CornerRadii.Empty,BorderWidths.Default))
-			}
+			val gp:GridPane = new GridPane() { border() = new Border(new BorderStroke(web("0x000000"),BorderStrokeStyle.Solid,CornerRadii.Empty,BorderWidths.Default)) }
 			gp.add(xAxisAR,0,0)
 			gp.add(yAxisAR,0,1)
 			gp.add(xAxis0,0,2)
@@ -347,7 +288,7 @@ object resultsViewer extends JFXApp {
 			gp.add(enableTTs,0,6)
 			val hb = new HBox(jpg,outCsv,png)
 			val vb = new VBox(gp,hb,txt,lv)
-			vb.width.onChange{
+			vb.width.onChange {
 				hb.minWidth() = vb.width()
 				hb.maxWidth() = vb.width()
 				txt.minWidth(vb.width())

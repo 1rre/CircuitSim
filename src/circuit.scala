@@ -6,7 +6,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.io.Source._
 import scala.math._
 
-object resultsViewer extends App{
+object resultsViewer extends App {
 	import CirClasses._
 	val sim = getComs
 	var output:String = ""
