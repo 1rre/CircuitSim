@@ -22,3 +22,8 @@ To run the program, run `./CircuitSim.sh [CIR FILE]`, or to use the [default net
     sudo apt-get install sbt  
     sudo apt-get install default-jdk
 ```
+
+
+## Functional
+
+In addition to the C++ simulator, I have also coded a [simulator](/functional) in Scala that works using a more analytic approach. I stopped working on this version once the C++ version appeared to work better for more complex circuits however it does work much faster for simple circuits with a single voltage source connected to ground & any combination of impeders.
