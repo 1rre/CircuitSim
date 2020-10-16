@@ -6,7 +6,7 @@ import org.apache.commons.math3.complex.Complex
 import org.apache.commons.math3.linear._
 
 object Test extends App {
-  Test2
+  Test1
 }
 
 object Test1 {
@@ -17,33 +17,8 @@ object Test1 {
     new Node(3)
   )
   val cmpList = Vector(
-    new VoltageSrc(4, ndList(1), ndList(2), 0,"V1"),
-    new Impeder(1.5e3, ndList(2), ndList(3), 0, "R1"),
-    new Impeder(3.6e-6, ndList(3), ndList(0), 5, "C1"),
-    new Impeder(3.6e3, ndList(2), ndList(3), 1, "R2"),
-    new Impeder(4.9e3, ndList(2), ndList(0), 2, "R3"),
-    new Impeder(1.3e4, ndList(3), ndList(0), 3, "R4"),
-    new Impeder(2.9e3, ndList(0), ndList(1), 4, "R5"),
-    new VoltageSrc(1, ndList(2), ndList(3), 1, "V2")
-  )
-  val x: Circuit = merge(ndList, cmpList)
-  def nodes: Vector[Node] = x.nodes
-  def components: Vector[Component] = x.components
-  val y = x.findLoops
-  y.foreach(n => println(n.nodes))
-}
-
-object Test2 {
-  val ndList = Vector(
-    new Node(0),
-    new Node(1),
-    new Node(2),
-    new Node(3)
-  )
-  val cmpList = Vector(
     new VoltageSrc(4, ndList(0), ndList(1), 0,"V1"),
     new Impeder(1.5e3, ndList(1), ndList(2), 0, "R1"),
-    //new Impeder(3.6e-6, ndList(2), ndList(3), 5, "C1"),
     new Impeder(3.6e3, ndList(1), ndList(2), 1, "R2"),
     new Impeder(4.9e3, ndList(1), ndList(3), 2, "R3"),
     new Impeder(1.3e4, ndList(2), ndList(3), 3, "R4"),

@@ -62,7 +62,7 @@ object Component {
     val cmp: Char
     def onLoops(l: Vector[Mesh]): Vector[(Mesh, Int)] = l.zipWithIndex.filter(_._1.components.contains(this))
     override def toString: String = name
-    //var current: Double => Complex
+    var current: Double => Complex
   }
   trait SeriesComponent extends Component {
     def series: (Component, Component)
@@ -148,28 +148,21 @@ object Component {
       findComponents(nodes, components).map(c => new Mesh(findNodes(c), c)).filter(l => l.nodes.tail.distinct.length == l.nodes.tail.length).sortBy(_.components.length).foldLeft(Vector[Mesh]())((acc, v) => if(v.components.diff(acc.foldLeft(Vector[Component]())((cp, lp) => cp ++ lp.components)).length == 0) acc else acc :+ v)
     }
   }
-
-  /*
-    http://fourier.eng.hmc.edu/e84/lectures/ch2/node2.html
-    https://www.khanacademy.org/science/electrical-engineering/ee-circuit-analysis-topic/ee-dc-circuit-analysis/a/ee-loop-current-method
-  */
-
   class Mesh(nds: Vector[Node], cmps: Vector[Component]) extends Circuit(nds, cmps) {
-    def current: Double => Double = { //TODO: Work out how to apply KVL
+    def current: Double => Double = {
       (t: Double) => 0d
     }
   }
-  
-/*  implicit class findCurrent(lp: Vector[Mesh]) {
+  implicit class findCurrent(lp: Vector[Mesh]) {
     def matrix = {
       val a = Vector.tabulate(lp.length)(x => lp(x).components.collect{case v: VoltageSrc => v.voltage} match {
         case a if a.isEmpty => new Voltage(0, 0, 0, 0)
         case a => a.reduce((acc, v) => acc + v)
       })
       (Vector.tabulate(lp.length, lp.length)((x, y) => (lp(x).components.collect{case z: Impeder => z}.filter(_.onLoops(lp).exists(_._2 == y)).map(_.value).fold((_: Double) => new Complex(0,0))((acc, v) => acc + v) * (if (x == y) 1 else -1))(a(x).omega)).toMatrix, a)
-      /*a.zipWithIndex.map(c => {
+      a.zipWithIndex.map(c => {
         (c._1.map(_(b(c._2).omega)), b(c._2))
-      })*/
+      })
     }
-  }*/
+  }
 }
