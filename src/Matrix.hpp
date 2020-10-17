@@ -36,7 +36,8 @@ mat getZ(mat mxPre1, mat mxPre2, Sim _, double time)
 {//if the time is 0 or greater, we are doing an ac simulation
 			val = iS.waveform(time); //Get the value of the source at the current time (this allows sin, pulse, etc. to have time variant voltages)
 		}							 //and set the variable declared earlier to it.
-		else{ //if the time is less than 0 (ie -1), we are doing an operating point check
+		else
+{ //if the time is less than 0 (ie -1), we are doing an operating point check
 			val = iS.DCOffset;  //set the variable we declared earlier as equal to the DC offset of the source (or just the value if the source is DC)
 		}
 		if(iS.cName == 'I')
@@ -44,7 +45,8 @@ mat getZ(mat mxPre1, mat mxPre2, Sim _, double time)
 			rtn(iS.pos->ID - 1,0) += val; //Add the value of "iS" to index (x,0) in the I Matrix, where 'x' is the ID of the node attached to "iS"'s positive side
 			rtn(iS.neg->ID - 1,0) -= val; //Sub the value of "iS" from index (y,0) in the I Matrix, where 'y' is the ID of the node attached to "iS"'s negative side
 		}
-		else{ //If the source "iS" is a voltage source
+		else
+{ //If the source "iS" is a voltage source
 			rtn(nCnt + iS.id,0) = val; //Set the index (z,0) in the E Matrix as equal to the value of the voltage source, where 'z' is the ID of the voltage source
 		}
 	}
@@ -61,7 +63,8 @@ mat getZ(mat mxPre1, mat mxPre2, Sim _, double time)
 {
 			val = dS.waveform(mxPre1,mxPre2,_.timeStep); //We need the 2 previous "mx"es here, where "mx" is the X matrix which contains the voltages at each node.
 		}												 											 //We use that to calculate dV/dt for the capacitor and inductor transient equations.
-		else{ //From here this loop is written the same as the independent sources one.
+		else
+{ //From here this loop is written the same as the independent sources one.
 			val = dS.DCOffset;
 		}
 		rtn[nCnt + dS.id] = val;
