@@ -40,8 +40,6 @@ object Util {
       def c = mesh._2(0)
       if(c.isInstanceOf[VoltageSrc]) nd match {
         case b if b == c.neg /*&& c.neg.voltage.parts.intersect(c.asInstanceOf[VoltageSrc].voltage.parts).length == 0*/ => {
-          println(nd)
-          println(c)
           c.pos.addVoltage += c.asInstanceOf[VoltageSrc].voltage
           c.pos.vInSource = c.neg
         }

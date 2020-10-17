@@ -17,7 +17,6 @@ object Test {
       case v1: VoltageSrc => new VoltageSrc(v1.voltage, v.neg, v1.pos, -1, "VSrc")
       case a => a
     } else c)
-    //setReference(ndList, cAlt)
     merge(ndList, cAlt)
   })
   x.foreach(y => {
@@ -27,7 +26,6 @@ object Test {
     })
     setReference(y._1, y._2)
     voltageImpl(y)
-    println(y._2)
     y._1.foreach(n => println(n.toString + ": " + n.addVoltage(0) + ", " + n.reference + ", " + n.defined))
   })
   }
