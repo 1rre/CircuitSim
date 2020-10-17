@@ -22,12 +22,10 @@ object Numerics {
     def /(a: Complex) = i * a.pow(-1)
   }
   implicit class FieldMatrixImplicits(m: Vector[Vector[Complex]]) {
-    def toMatrix: Array2DRowFieldMatrix[Complex] = {
-      val x = m.map(_.toArray).toArray
-      new Array2DRowFieldMatrix(x)
-    }
+    def toMatrix: Array2DRowFieldMatrix[Complex] = new Array2DRowFieldMatrix(m.map(_.toArray).toArray)
   }
-  implicit class MeanVector(x: Vector[(Double, Double)]){
+  implicit class MeanVector(x: Vector[(Double, Double)]) {
     def mean = if(x.unzip._2.sum != 0) x.map(a => a._1 * a._2).sum / x.unzip._2.sum else 0
   }
+    
 }

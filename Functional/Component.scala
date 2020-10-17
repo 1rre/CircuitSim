@@ -149,9 +149,7 @@ object Component {
     }
   }
   class Mesh(nds: Vector[Node], cmps: Vector[Component]) extends Circuit(nds, cmps) {
-    def current: Double => Double = {
-      (t: Double) => 0d
-    }
+    def current: Double => Double = (t: Double) => 0d
   }
   implicit class findCurrent(lp: Vector[Mesh]) {
     def matrix = {
@@ -160,9 +158,7 @@ object Component {
         case a => a.reduce((acc, v) => acc + v)
       })
       (Vector.tabulate(lp.length, lp.length)((x, y) => (lp(x).components.collect{case z: Impeder => z}.filter(_.onLoops(lp).exists(_._2 == y)).map(_.value).fold((_: Double) => new Complex(0,0))((acc, v) => acc + v) * (if (x == y) 1 else -1))(a(x).omega)).toMatrix, a)
-      a.zipWithIndex.map(c => {
-        (c._1.map(_(b(c._2).omega)), b(c._2))
-      })
+      a.zipWithIndex.map(c => (c._1.map(_(b(c._2).omega)), b(c._2)))
     }
   }
 }

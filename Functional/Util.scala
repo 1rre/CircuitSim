@@ -9,7 +9,6 @@ object Util {
         case a if a.nonEmpty => (a.get.pos(cList)(0), a.get.neg(cList)(0)) match {
           case b if b._1.isInstanceOf[Impeder] => new SeriesImpeder(b.asInstanceOf[(Impeder, Impeder)])
           case b if b._1.isInstanceOf[VoltageSrc] => new SeriesVoltageSrc(b.asInstanceOf[(VoltageSrc, VoltageSrc)])
-          //case b if b._1.isInstanceOf[CurrentSrc] => sys.error("Current sources cannot be in series")
           case _ => null
         }
         case _ => null
@@ -28,11 +27,6 @@ object Util {
         case a if a.length == 1 => new ParallelImpeder(z.head, a(0))
         case a => mergeParallelImpeders(new ParallelImpeder(z.head, a(0)) +: a.tail)
       }
-      /*def mergeParallelCurrentSources(i: Vector[CurrentSrc]): CurrentSrc = i.tail match {
-        case a if a.length == 0 => i.head
-        case a if a.length == 1 => new ParallelCurrentSrc(i.head, a(0))
-        case a => mergeParallelCurrentSources(new ParallelCurrentSrc(i.head, a(0)) +: a.tail)
-      }*/
       if(nList.exists(_.pos(cList).count(_.cmp == 'V') > 1)) sys.error("Voltage sources cannot be parallel")
       cList.filter(_.cmp == 'V') ++ (cList.filter(_.cmp == 'Z').groupBy(z => (z.neg, z.pos))).map(a => mergeParallelImpeders(a._2.asInstanceOf[Vector[Impeder]])) //++ (cList.filter(_.cmp == 'I').groupBy(z => (z.neg, z.pos)).map(a => mergeParallelCurrentSources(a._2.asInstanceOf[Vector[CurrentSrc]])))
     }
@@ -56,6 +50,5 @@ object Util {
     })
   }
   def setReference(a: Vector[Node], b: Vector[Component]) = a.find(_.neg(b).exists(_.isInstanceOf[VoltageSrc])).getOrElse(a.find(_.neg(b).exists(_.isInstanceOf[CurrentSrc])).getOrElse(a(0))).reference = true
-  def impedanceImpl(lp: Vector[Mesh]) = {}
-  
+  def impedanceImpl(lp: Vector[Mesh]) = {} 
 }
