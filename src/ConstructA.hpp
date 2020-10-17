@@ -24,11 +24,11 @@ Mat<double> MatrixG(Sim s) // this function will return the G matrix, which show
       Gmatrix(pos,pos) += 1/s.resistors[i].val; // add or subtract the conductance of the resistor to the relevant spaces in the G matrix
     }
     if(pos==-1)
-{//if the positive node is the reference node
+    {//if the positive node is the reference node
       Gmatrix(neg,neg) += (1/s.resistors[i].val);
     }
     else if (neg==-1)
-{//if the negative node is the reference node.
+    {//if the negative node is the reference node.
       Gmatrix(pos,pos) += (1/s.resistors[i].val);
     }
   }
@@ -39,15 +39,15 @@ Mat<double> MatrixB(Sim s)
 { //Calculates Matrix B and stores the result in MatrixB
   double M = 0; //number of voltage sources
   for (size_t i = 0; i < s.sources.size(); i++)
-{ // finds the number of voltage sources and inductors in the netlist
+  { // finds the number of voltage sources and inductors in the netlist
     if (s.sources[i].cName=='V')
-{
+    {
       M+=1;
 
     }
   }
   for (size_t i = 0; i < s.dSources.size(); i++)
-{
+  {
     M+=1;
   }
 
@@ -55,9 +55,9 @@ Mat<double> MatrixB(Sim s)
   double cnt=0;
   Mat<double> MatrixB(N,M,fill::zeros); // creating a matrix of the correct size initialised with zeros
   for(int i = 0; i < s.sources.size(); i++)
-{ //cycling through the sources vector
+  { //cycling through the sources vector
     if (s.sources[i].cName=='V')
-{ // choosing the voltage sources and inductors
+    { // choosing the voltage sources and inductors
       double pos = s.sources[i].pos->ID-1;//finding the positive node
       double neg = s.sources[i].neg->ID-1;//finding the negative node
 
@@ -77,21 +77,21 @@ Mat<double> MatrixB(Sim s)
       cnt+=1;
     }
   }
-//  cout<<MatrixB<<endl;
+  //  cout<<MatrixB<<endl;
 
   for(int i = 0; i < s.dSources.size(); i++)
-{ //cycling through the sources vector
+  { //cycling through the sources vector
     double pos = s.dSources[i].pos->ID-1;//finding the positive node
     double neg = s.dSources[i].neg->ID-1;//finding the negative node
     if(pos>=0 && neg>=0) //if the source isnt connected to the reference node
-    	{
+    {
       MatrixB(pos,cnt)=1; //add the positive terminal
-    	MatrixB(neg,cnt)=-1; //add the negative terminal
-      }
+      MatrixB(neg,cnt)=-1; //add the negative terminal
+    }
     if (pos== -1) //if the positive terminal connects to the reference node
     {
       MatrixB(neg,cnt)=-1;
-  	}
+    }
     if (neg== -1)//if the negative termainal connects to the reference node
     {
       MatrixB(pos,cnt)=1;
@@ -111,15 +111,15 @@ Mat<double> MatrixD(Sim s)
 {
   double M = 0;
   for (size_t i = 0; i < s.sources.size(); i++)
-{
+  {
     if (s.sources[i].cName=='V')
-{
+    {
       M+=1;
     }
   }
   for (size_t i = 0; i < s.dSources.size(); i++)
-{
-  	M+=1;
+  {
+    M+=1;
   }
   Mat<double> D(M,M,fill::zeros);
   return D;
@@ -130,14 +130,14 @@ Mat<double> GetA(Sim s)
   double N = s.nodes.size()-1;
   double M = 0;
   for (size_t i = 0; i < s.sources.size(); i++)
-{
+  {
     if (s.sources[i].cName=='V')
-{
+    {
       M+=1;
     }
   }
   for (size_t i = 0; i < s.dSources.size(); i++)
-{
+  {
     M+=1;
   }
   Mat<double> A((N+M),(N+M),fill::zeros);
