@@ -17,9 +17,11 @@
 using namespace std;
 using namespace arma;
 
-double getVal(string num){ //The function that a number with a unit prefix (ie 1μ, 13.6k etc.)
+double getVal(string num)
+{ //The function that a number with a unit prefix (ie 1μ, 13.6k etc.)
 	double val; //double to store the result in
-	switch(num.back()){
+	switch(num.back())
+{
 		case 'p': //Pico
 		val = stod(num.substr(0, num.length()-1))*1e-12; //Value is the numerical part of the input string by 10⁻¹²
 		break;
@@ -101,7 +103,8 @@ struct Source:Component
 		{
 			case 0: //DC
 				this->DCOffset = args[0];
-				this->waveform = [args](double time){ return args[0]; };
+				this->waveform = [args](double time)
+				{return args[0]; };
 			break;
 
 			case 1:
@@ -109,7 +112,8 @@ struct Source:Component
 				double vInitial = 0, vOn = 0, tDelay = 0, tRise = 0, tFall = 0, tOn = 0, tPeriod = numeric_limits<double>::infinity(), nCycles = numeric_limits<double>::infinity();
 				switch(args.size())
 				{
-					case 1:{ //Vinitial
+					case 1:
+					{ //Vinitial
 						vInitial = args[0];
 						break;
 					}
@@ -209,60 +213,81 @@ struct Source:Component
 					}
 				}
 				this->DCOffset = vInitial;
-				this->waveform = [vInitial, vOn, tDelay, tRise, tFall, tOn, tPeriod, nCycles](double time){
-					if(time <= tDelay || time > tPeriod * nCycles + tDelay){
+				this->waveform = [vInitial, vOn, tDelay, tRise, tFall, tOn, tPeriod, nCycles](double time)
+{
+					if(time <= tDelay || time > tPeriod * nCycles + tDelay)
+					{
 						return vInitial;
 					}
 					const double effTime = fmod(time - tDelay, tPeriod);
-					if(effTime <= tRise){
+					if(effTime <= tRise)
+					{
 						return vInitial + (vOn - vInitial) * (effTime / tRise);
 					}
-					else if(effTime <= tRise + tOn){
+					else if(effTime <= tRise + tOn)
+					{
 						return vOn;
 					}
-					else if(effTime <= tRise + tOn + tFall){
+					else if(effTime <= tRise + tOn + tFall)
+					{
 						return vOn - (vOn - vInitial) * (effTime - tOn - tRise) / tFall;
 					}
 					return vInitial;
 				};
-				break;}
-			case 2:{ //Sine
+				break;
+				}
+			case 2:
+			{ //Sine
 				double vOffset = 0, vAmp = 0, freq = 0, tDelay = 0, theta = 0, phi = 0, nCycles = numeric_limits<double>::infinity();
-				switch(args.size()){
-					case 1:{ //Voffset
+				switch(args.size())
+				{
+					case 1:
+{ //Voffset
 						vOffset = args[0];
-						break;}
-					case 2:{ //Prevs & Vamp
+						break;
+}
+					case 2:
+{ //Prevs & Vamp
 						vOffset = args[0];
 						vAmp = args[1];
-						break;}
-					case 3:{ //Prevs & Freq
+						break;
+}
+					case 3:
+{ //Prevs & Freq
 						vOffset = args[0];
 						vAmp = args[1];
 						freq = args[2];
-						break;}
-					case 4:{ //Prevs & Tdelay
+						break;
+}
+					case 4:
+{ //Prevs & Tdelay
 						vOffset = args[0];
 						vAmp = args[1];
 						freq = args[2];
 						tDelay = args[3];
-						break;}
-					case 5:{ //Prevs & Theta (damping)
+						break;
+}
+					case 5:
+{ //Prevs & Theta (damping)
 						vOffset = args[0];
 						vAmp = args[1];
 						freq = args[2];
 						tDelay = args[3];
 						theta = args[4];
-						break;}
-					case 6:{ //Prevs & Phi (phase)
+						break;
+}
+					case 6:
+{ //Prevs & Phi (phase)
 						vOffset = args[0];
 						vAmp = args[1];
 						freq = args[2];
 						tDelay = args[3];
 						theta = args[4];
 						phi = args[5];
-						break;}
-					case 7:{ //Prevs & Ncycles
+						break;
+}
+					case 7:
+{ //Prevs & Ncycles
 						vOffset = args[0];
 						vAmp = args[1];
 						freq = args[2];
@@ -270,120 +295,161 @@ struct Source:Component
 						theta = args[4];
 						phi = args[5];
 						nCycles = args[6];
-						break;}
+						break;
+}
 				}
 				this->DCOffset = vOffset;
-				this->waveform = [vOffset, vAmp, freq, tDelay, theta, phi, nCycles](double time){
+				this->waveform = [vOffset, vAmp, freq, tDelay, theta, phi, nCycles](double time)
+{
 					double effTime = tDelay - time;
-					if(time < tDelay){
+					if(time < tDelay)
+{
 						return vOffset + vAmp * sin(phi);
 					}
-					else if(time > nCycles / (freq) + tDelay){
+					else if(time > nCycles / (freq) + tDelay)
+{
 						effTime = -nCycles / (freq);
 					}
 					return vOffset + vAmp * exp(theta * effTime) * sin(2 * M_PI * freq * effTime + phi);
 				};
-				break;}
-			case 3:{ //Exp
+				break;
+}
+			case 3:
+{ //Exp
 				double vInitial = 0, vPulse = 0, rDelay = 0, rTau = 1, fDelay = numeric_limits<double>::infinity(), fTau = numeric_limits<double>::infinity();
-				switch(args.size()){
-					case 1:{ //Vinitial (DC Offset)
+				switch(args.size())
+{
+					case 1:
+{ //Vinitial (DC Offset)
 						vInitial = args[0];
-						break;}
-					case 2:{ //Prevs & Vpulsed
+						break;
+}
+					case 2:
+{ //Prevs & Vpulsed
 						vInitial = args[0];
 						vPulse = args[1];
-						break;}
-					case 3:{ //Prevs & Rise Delay
+						break;
+}
+					case 3:
+{ //Prevs & Rise Delay
 						vInitial = args[0];
 						vPulse = args[1];
 						rDelay = args[2];
-						break;}
-					case 4:{ //Prevs & Rise Tau
+						break;
+}
+					case 4:
+{ //Prevs & Rise Tau
 						vInitial = args[0];
 						vPulse = args[1];
 						rDelay = args[2];
 						rTau = args[3];
-						break;}
-					case 5:{ //Prevs & Fall Delay
+						break;
+}
+					case 5:
+{ //Prevs & Fall Delay
 						vInitial = args[0];
 						vPulse = args[1];
 						rDelay = args[2];
 						rTau = args[3];
 						fDelay = args[4];
-						break;}
-					case 6:{ //Prevs & Fall Tau
+						break;
+}
+					case 6:
+{ //Prevs & Fall Tau
 						vInitial = args[0];
 						vPulse = args[1];
 						rDelay = args[2];
 						rTau = args[3];
 						fDelay = args[4];
 						fTau = args[5];
-						break;}
+						break;
+}
 				}
 				this->DCOffset = vInitial;
-				this->waveform = [vInitial,vPulse,rDelay,rTau,fDelay,fTau](double time){
+				this->waveform = [vInitial,vPulse,rDelay,rTau,fDelay,fTau](double time)
+{
 					double rtn = vInitial;
-					if(time > rDelay){
+					if(time > rDelay)
+{
 						rtn += (vPulse - vInitial) * (1 - exp((rDelay - time) / rTau));
 					}
-					if(time>fDelay){
+					if(time>fDelay)
+{
 						rtn += (vInitial - vPulse) * (1 - exp((fDelay - time) / fTau));
 					}
 					return rtn;
 				};
 				break;
 			}
-			case 4:{ //Sffm
+			case 4:
+{ //Sffm
 				double vOffset = 0, vAmp = 0, fCarrier = 0, mIndex = 1, fSignal = 0, tDelay = 0;
-				switch(args.size()){
-					case 1:{
+				switch(args.size())
+{
+					case 1:
+{
 						vOffset = args[0];
-						break;}
-					case 2:{
+						break;
+}
+					case 2:
+{
 						vOffset = args[0];
 						vAmp = args[1];
-						break;}
-					case 3:{
+						break;
+}
+					case 3:
+{
 						vOffset = args[0];
 						vAmp = args[1];
 						fCarrier = args[2];
-						break;}
-					case 4:{
+						break;
+}
+					case 4:
+{
 						vOffset = args[0];
 						vAmp = args[1];
 						fCarrier = args[2];
 						mIndex = args[3];
-						break;}
-					case 5:{
+						break;
+}
+					case 5:
+{
 						vOffset = args[0];
 						vAmp = args[1];
 						fCarrier = args[2];
 						mIndex = args[3];
 						fSignal = args[4];
-						break;}
-					case 6:{
+						break;
+}
+					case 6:
+{
 						vOffset = args[0];
 						vAmp = args[1];
 						fCarrier = args[2];
 						mIndex = args[3];
 						fSignal = args[4];
 						tDelay = args[5];
-						break;}
+						break;
+}
 				}
 				this->DCOffset = vOffset;
-				this->waveform = [vOffset, vAmp, fCarrier, mIndex, fSignal,tDelay](double time){
-					if(time<tDelay){
+				this->waveform = [vOffset, vAmp, fCarrier, mIndex, fSignal,tDelay](double time)
+{
+					if(time<tDelay)
+{
 						return vOffset;
 					}
 					const double effTime = time - tDelay;
 					return vOffset + vAmp * (sin(2 * M_PI * fCarrier * effTime + mIndex * sin(2 * M_PI * fSignal * effTime)));
 				};
-				break;}
-			case 5:{ //Pwl //TODO: implement trigger
+				break;
+}
+			case 5:
+{ //Pwl //TODO: implement trigger
 				map<double,double> points;
 				int end = 0;
-				for(int i = 0; args[i]!=numeric_limits<double>::infinity(); i+=2){
+				for(int i = 0; args[i]!=numeric_limits<double>::infinity(); i+=2)
+{
 					points[args[i]] = args[i+1];
 					end = i;
 				}
@@ -391,24 +457,30 @@ struct Source:Component
 				end = 0;
 				bool repeat_ = args[end]; //True if the PWL repeats forever
 				this->DCOffset = args[1];
-				this->waveform = [points,repeat_](double time){
+				this->waveform = [points,repeat_](double time)
+{
 					double effTime = fmod(time,(*prev(points.end())).first);
-					if(time < (*points.begin()).first || (repeat_ && effTime < (*points.begin()).first)){
+					if(time < (*points.begin()).first || (repeat_ && effTime < (*points.begin()).first))
+{
 						return (*points.begin()).second;
 					}
-					else if(time > (*prev(points.end())).first && !repeat_){
+					else if(time > (*prev(points.end())).first && !repeat_)
+{
 						return (*prev(points.end())).second;
 					}
 					pair<double,double> t1 = (*points.lower_bound(effTime));
 					pair<double,double> t2 = (*prev(points.lower_bound(effTime)));
 					return ((t2.second - t1.second) / (t2.first - t1.first)) * (effTime - t1.first) + t1.second;
 				};
-				break;}
+				break;
+}
 			/* USE IN GETCOMS:
-			case 6:{ //Pwl File
+			case 6:
+{ //Pwl File
 				ifstream file;
 				file.open("input.pwl");
-				if(!file){
+				if(!file)
+{
 					cerr<<"File does not exist"<<endl;
 					exit(4);
 				}
@@ -416,80 +488,106 @@ struct Source:Component
 				map<double,double> points;
 				smatch m;
 				string s = "";
-				while(file>>s){
+				while(file>>s)
+{
 					regex_search(s,m,com);
 					points[stod(m.prefix())] = stod(m.suffix());
 				}
 				file.close();
 				remove("input.pwl");
-				this->waveform = [points](double time){
-					if(time < (*points.begin()).first){
+				this->waveform = [points](double time)
+{
+					if(time < (*points.begin()).first)
+{
 						return (*points.begin()).second;
 					}
-					else if(time > (*prev(points.end())).first){
+					else if(time > (*prev(points.end())).first)
+{
 						return (*prev(points.end())).second;
 					}
 					pair<double,double> t1 = (*points.lower_bound(time));
 					pair<double,double> t2 = (*prev(points.lower_bound(time)));
 					return ((t2.second - t1.second) / (t2.first - t1.first)) * (time - t1.first) + t1.second;
 				};
-				break;}*/
-			case 6:{ //AM
+				break;
+}*/
+			case 6:
+{ //AM
 				double aSignal = 0, fCarrier = 0, fMod = 0, cOffset = 0, tDelay = 0;
-				switch(args.size()){
-					case 1:{
+				switch(args.size())
+{
+					case 1:
+{
 						aSignal = args[0];
-						break;}
-					case 2:{
+						break;
+}
+					case 2:
+{
 						aSignal = args[0];
 						fCarrier = args[1];
-						break;}
-					case 3:{
+						break;
+}
+					case 3:
+{
 						aSignal = args[0];
 						fCarrier = args[1];
 						fMod = args[2];
-						break;}
-					case 4:{
+						break;
+}
+					case 4:
+{
 						aSignal = args[0];
 						fCarrier = args[1];
 						fMod = args[2];
 						cOffset = args[3];
-						break;}
-					case 5:{
+						break;
+}
+					case 5:
+{
 						aSignal = args[0];
 						fCarrier = args[1];
 						fMod = args[2];
 						cOffset = args[3];
 						tDelay = args[4];
-						break;}
+						break;
+}
 				}
 				this->DCOffset = 0;
-				this->waveform = [aSignal, fCarrier, fMod, cOffset, tDelay](double time){
-					if(time<tDelay){
+				this->waveform = [aSignal, fCarrier, fMod, cOffset, tDelay](double time)
+{
+					if(time<tDelay)
+{
 						return double(0);
 					}
 					double effTime = time - tDelay;
 					return aSignal * (cOffset + sin(2 * M_PI * fMod * effTime)) * sin(2 * M_PI * fCarrier * effTime);
 				};
-				break;}
+				break;
+}
 		}
 	}
 };
 
 struct DepSource:Source{ //TODO: Implement other dependent sources
 	function<double(Mat<double>,Mat<double>,double)> waveform;
-	void srcFunc(int id, vector<double> args){
-		switch(id){
-			case 0:{ //Inductor
+	void srcFunc(int id, vector<double> args)
+{
+		switch(id)
+{
+			case 0:
+{ //Inductor
 					double lValue = args[0], posNode = args[1], negNode = args[2];
-					this->waveform = [lValue, posNode, negNode](Mat<double> mxPre1, Mat<double> mxPre2, double ts){
+					this->waveform = [lValue, posNode, negNode](Mat<double> mxPre1, Mat<double> mxPre2, double ts)
+{
 						double vPre1;
 					double vPre2;
-					if(posNode == 0 ){
+					if(posNode == 0 )
+{
 						vPre1 = 0 - mxPre1(negNode - 1,0);
 						vPre2 = 0 - mxPre2(negNode - 1,0);
 					}
-					else if(negNode == 0){
+					else if(negNode == 0)
+{
 						vPre1 = mxPre1(posNode - 1,0) - 0;
 						vPre2 = mxPre2(posNode - 1,0) - 0;
 					}
@@ -497,22 +595,28 @@ struct DepSource:Source{ //TODO: Implement other dependent sources
 						vPre1= mxPre1(posNode - 1,0) - mxPre1(negNode - 1,0); //Voltage across inductor at t-timestep
 						vPre2 = mxPre2(posNode - 1,0) - mxPre2(negNode - 1,0); //Voltage across inductor at t-2·timestep
 					}
-					if((vPre1 - vPre2) != 0){
+					if((vPre1 - vPre2) != 0)
+{
 						return (vPre1 - vPre2) * lValue / ts;
 					}
 					return lValue / ts;
 					};
-				break;}
-			case 1:{ //Capacitor
+				break;
+}
+			case 1:
+{ //Capacitor
 				double cValue = args[0], posNode = args[1], negNode = args[2];
-				this->waveform = [cValue, posNode, negNode](Mat<double> mxPre1, Mat<double> mxPre2, double ts){
+				this->waveform = [cValue, posNode, negNode](Mat<double> mxPre1, Mat<double> mxPre2, double ts)
+{
 					double vPre1;
 					double vPre2;
-					if(posNode == 0 ){
+					if(posNode == 0 )
+{
 						vPre1 = 0 - mxPre1(negNode - 1,0);
 						vPre2 = 0 - mxPre2(negNode - 1,0);
 					}
-					else if(negNode == 0){
+					else if(negNode == 0)
+{
 						vPre1 = mxPre1(posNode - 1,0) - 0;
 						vPre2 = mxPre2(posNode - 1,0) - 0;
 					}
@@ -522,17 +626,25 @@ struct DepSource:Source{ //TODO: Implement other dependent sources
 					}
 					return ((vPre1 - vPre2) * cValue / ts) - (mxPre1(posNode - 1,0) + mxPre1(negNode - 1,0));
 				};
-				break;}
-			case 2:{ //Voltage Trigger
+				break;
+}
+			case 2:
+{ //Voltage Trigger
 
-				break;}
-			case 3:{ //Current Trigger
+				break;
+}
+			case 3:
+{ //Current Trigger
 
-				break;}
-			case 4:{ //Voltage Dependant
+				break;
+}
+			case 4:
+{ //Voltage Dependant
 
-				break;}
-			case 5:{ //Current Dependant
+				break;
+}
+			case 5:
+{ //Current Dependant
 
 			}
 		}
@@ -550,19 +662,22 @@ public:
 	double start;
 	double end;
 	int steps;
-	void DC(){ //Constructor for a operating point simulation
+	void DC()
+{ //Constructor for a operating point simulation
 		this->start = 0;
 		this->end = 0;
 		this->timeStep = 0;
 		this->steps = 0;
 	}
-	void Tran(double start, double end, double timeStep){ //Constructor for a transient simulation given a timestep
+	void Tran(double start, double end, double timeStep)
+{ //Constructor for a transient simulation given a timestep
 	    this->start = start;
 	    this->end = end;
 	    this->timeStep = timeStep;
 	    this->steps = ((start-end)/timeStep);
 	}
-	void Tran(double start, double end, int steps){ //Constructor for a transient simulation given the number of steps
+	void Tran(double start, double end, int steps)
+{ //Constructor for a transient simulation given the number of steps
 	    this->start = start;
 		this->end = end;
 		this->steps = steps;
@@ -570,7 +685,8 @@ public:
 	}
 	Sim();
 };
-Sim::Sim(){
+Sim::Sim()
+{
 	this->sources = vector<Source>{}; //Empty vectors to be filled - initialised here due to issues with data getting lost
 	this->dSources = vector<DepSource>{};
 	this->resistors = vector<Resistor>{};
@@ -596,21 +712,26 @@ Sim::Sim(){
   const regex vComEx("((R|L|C)(([0-9]+)|([A-z]+))+ ((N[0-9][0-9][0-9])|0) ((N[0-9][0-9][0-9])|0) (-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)"); //A full line in the CIR file for any resistor
   const regex srcEx("((V|I)(([0-9]+)|([A-z]+))+ ((N[0-9][0-9][0-9])|0) ((N[0-9][0-9][0-9])|0) ((DC (((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))|(SINE[ ]?[(]?( ?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])|(PULSE[ ]?[(]?( ?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])|(EXP[ ]?[(]?( ?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])|(SFFM[ ]?[(]?( ?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])|((PWL)  ((VALUE[_]SCALE[_]FACTOR[=](((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))?( )?(TIME[_]SCALE[_]FACTOR[=](((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))( )?)?(((REPEAT FOR)(( [0-9]+)|(EVER)))? [(]((([+]?(-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?) ((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?))*)|(file[=](.*))[)] (ENDREPEAT)?( )?)+ (TRIGGER V([(]N[0-9][0-9][0-9])[)](([>])|([=])|([<]))(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?))?)|(AM[ ]?[(]?(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)? )?)(((-)?[0-9]+([.][0-9]+)?(p|n|u|µ|m|k|(Meg)|G)?)?)[)])))"); //A full line in the CIR file for any type of voltage or current source, either AC or DC
 	vector<string> lines; //The vector of strings read from cin. Used so that the user can input lines without having to wait for them to parse.
-	while(cin){ //While data is being inputted
+	while(cin)
+{ //While data is being inputted
 		string line=""; //Create a blank string to store the line in
 		getline(cin, line); //Add the next line to the string
 		string _l = line;
 		smatch m; //A "string match" object for the matches to regex search to be put in
-		while(regex_search(_l,m,node)){ //Search the inputted line for nodes
+		while(regex_search(_l,m,node))
+{ //Search the inputted line for nodes
 			int pnd = 0; //Int for the node's id
-			if(m.str(0) == " 0"){
+			if(m.str(0) == " 0")
+{
 				pnd = 0;
 			}
 			else{
 				pnd = stoi(m.str(0).substr(2)); //Set the int to the node's id
 			}
-			if(pnd >= this->nodes.size()){ //If the node isn't already in the list
-				for(int i = this->nodes.size(); i<=pnd;i++){
+			if(pnd >= this->nodes.size())
+{ //If the node isn't already in the list
+				for(int i = this->nodes.size(); i<=pnd;i++)
+{
 					this->nodes.push_back(Node(i)); //Add all the nodes with ids lower or equal to the inputted one (so that they're in the right order).
 				}
 			}
@@ -618,8 +739,10 @@ Sim::Sim(){
 		}
 		lines.push_back(line); //Add the line to the vector of lines.
 	}
-	for(string l:lines){
-		if(regex_match(l,vComEx)){ //Resistors, capacitors and inductors
+	for(string l:lines)
+{
+		if(regex_match(l,vComEx))
+{ //Resistors, capacitors and inductors
 			Resistor v;
 			smatch m;
 			regex_search(l, m, vCom);
@@ -628,7 +751,8 @@ Sim::Sim(){
 			string _l = m.suffix();
 			regex_search(_l,m,node);
 			int pnd = 0;
-			if(m.str(0) == " 0"){
+			if(m.str(0) == " 0")
+{
 				pnd = 0;
 			}
 			else{
@@ -639,7 +763,8 @@ Sim::Sim(){
 			_l = m.suffix();
 			regex_search(_l,m,node);
 			int nnd = 0;
-			if(m.str(0) == " 0"){
+			if(m.str(0) == " 0")
+{
 				nnd = 0;
 			}
 			else{
@@ -648,7 +773,8 @@ Sim::Sim(){
 			v.neg = new Node(0);
 			v.neg = &this->nodes[nnd]; //5 of 6
 			v.val = getVal(string(m.suffix()).substr(1));
-			if(v.cName == 'R'){ //Resistor
+			if(v.cName == 'R')
+{ //Resistor
 				v.id = rCnt; //1 of 6
 				rCnt++;
 				this->resistors.push_back(v);
@@ -662,7 +788,8 @@ Sim::Sim(){
 				dS.neg = new Node(0);
 				dS.pos = v.pos;
 				dS.neg = v.neg;
-				/*if(dS.cName == 'L'){
+				/*if(dS.cName == 'L')
+{
 					dS.id = iCnt;
 					iCnt++;
 				}
@@ -675,7 +802,8 @@ Sim::Sim(){
 				this->dSources.push_back(dS);
 			}
 		}
-		else if(regex_match(l,srcEx)){ //Sources
+		else if(regex_match(l,srcEx))
+{ //Sources
             Source aS;
             smatch m;
             regex_search(l,m,src);
@@ -684,7 +812,8 @@ Sim::Sim(){
             string _l = m.suffix();
             regex_search(_l,m,node);
 			int pnd = 0;
-			if(m.str(0) == " 0"){
+			if(m.str(0) == " 0")
+{
 				pnd = 0;
 			}
 			else{
@@ -695,7 +824,8 @@ Sim::Sim(){
 			int nnd = 0;
 			_l = m.suffix();
 			regex_search(_l,m,node);
-			if(m.str(0) == " 0"){
+			if(m.str(0) == " 0")
+{
 				nnd = 0;
 			}
 			else{
@@ -703,56 +833,69 @@ Sim::Sim(){
 			}
 			aS.neg = new Node(0);
 			*aS.neg = (*this).nodes[nnd]; //5 of 6
-			if(aS.cName != 'L'){
+			if(aS.cName != 'L')
+{
 				aS.id = vCnt;
 	            vCnt++;
 			}
 			_l = string(m.suffix()).substr(1);
-            if(regex_search(_l,m,dc)){
+            if(regex_search(_l,m,dc))
+{
 				_l = string(m.str(0)).substr(3);
 				vector<double> args{getVal(_l)};
 				aS.srcFunc(0, args);
 			}
-			else if(regex_search(_l,m,pulse)){
+			else if(regex_search(_l,m,pulse))
+{
 				vector<double> args;
-				while(regex_search(_l,m,value)){
+				while(regex_search(_l,m,value))
+{
 					args.push_back(getVal(m.str(0)));
 					_l = m.suffix();
 				}
 				aS.srcFunc(1, args);
 			}
-			else if(regex_search(_l,m,sine)){
+			else if(regex_search(_l,m,sine))
+{
 				vector<double> args;
-				while(regex_search(_l,m,value)){
+				while(regex_search(_l,m,value))
+{
 					args.push_back(getVal(m.str(0)));
 					_l = m.suffix();
 				}
 				aS.srcFunc(2, args);
 			}
-			else if(regex_search(_l,m,exp)){
+			else if(regex_search(_l,m,exp))
+{
 				vector<double> args;
-				while(regex_search(_l,m,value)){
+				while(regex_search(_l,m,value))
+{
 					args.push_back(getVal(m.str(0)));
 					_l = m.suffix();
 				}
 				aS.srcFunc(3, args);
 			}
-			else if(regex_search(_l,m,sffm)){
+			else if(regex_search(_l,m,sffm))
+{
 				vector<double> args;
-				while(regex_search(_l,m,value)){
+				while(regex_search(_l,m,value))
+{
 					args.push_back(getVal(m.str(0)));
 					_l = m.suffix();
 				}
 				aS.srcFunc(4, args);
 			}
-			else if(regex_search(_l,m,pwl)){
+			else if(regex_search(_l,m,pwl))
+{
 				//TODO: This mess
 				cerr<<"PWLs are scary yo, check back later"<<endl;
 				exit(5);
 			}
-			else if(regex_search(_l,m,am)){
+			else if(regex_search(_l,m,am))
+{
 				vector<double> args;
-				while(regex_search(_l,m,value)){
+				while(regex_search(_l,m,value))
+{
 					args.push_back(getVal(m.str(0)));
 					_l = m.suffix();
 				}
@@ -760,33 +903,45 @@ Sim::Sim(){
 			}
 			this->sources.push_back(aS);
 		}
-		else if(regex_match(l,tranEx)){ //Transients be like 0 [tstop] [tstart] [timestep]
+		else if(regex_match(l,tranEx))
+{ //Transients be like 0 [tstop] [tstart] [timestep]
 			vector<double> params;
 			string _l = l;
 			smatch m;
-			while(regex_search(_l,m,value)){
+			while(regex_search(_l,m,value))
+{
 				params.push_back(getVal(m.str(0)));
 				_l = m.suffix();
 			}
-			switch(params.size()){
-				case 2:{ //Just stop time
+			switch(params.size())
+{
+				case 2:
+{ //Just stop time
 					this->Tran(double(0), params[1], 1000);
-					break;}
-				case 3:{ //Start and stop time
+					break;
+}
+				case 3:
+{ //Start and stop time
 					this->Tran(params[2], params[1], 1000);
-					break;}
-				case 4:{
+					break;
+}
+				case 4:
+{
 					this->Tran(params[2], params[1], params[3]);
-					break;}
+					break;
+}
 			}
 		}
-		else if(l==".op"){
+		else if(l==".op")
+{
 			this->DC(); //Set the number of steps to 0. This is how we will decide something is a bias point check.
 		}
-		else if(l==".end"){
+		else if(l==".end")
+{
 			break; //break out of the for loop
 		}
-		else if(!regex_match(l,comment)){ //If the line isn't a command or a comment
+		else if(!regex_match(l,comment))
+{ //If the line isn't a command or a comment
 			cerr<<"Exception in netlist: Invalid format '"<<l<<"' found. Exiting."<<endl;
 			exit(1); //Exit with error code 1: Invalid format in netlist //TODO: make list of error codes and what they mean
 		}
