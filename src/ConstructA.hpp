@@ -13,11 +13,11 @@ Mat<double> MatrixG(Sim s) // this function will return the G matrix, which show
   Mat<double> Gmatrix(N-1,N-1, fill::zeros); //constructing a matrix of the correct size for G
 
   for (size_t i = 0; i < s.resistors.size(); i++)
-{ // for loop that cycles through each resistor
+  { // for loop that cycles through each resistor
     double pos = s.resistors[i].pos->ID-1; // positive node. (-1) so that the matrix fills from 0
     double neg = s.resistors[i].neg->ID-1; // negative node. the reference node becomes -1
     if (pos>=0 && neg>=0)
-{ // if the resistor is not connected to the reference node (node -1)
+    { // if the resistor is not connected to the reference node (node -1)
       Gmatrix(pos,neg) += -1/s.resistors[i].val;
       Gmatrix(neg,pos) += -1/s.resistors[i].val;
       Gmatrix(neg,neg) += 1/s.resistors[i].val;
